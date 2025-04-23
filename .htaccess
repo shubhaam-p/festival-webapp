@@ -1,0 +1,75 @@
+## need to add this module functionality in nginx
+<ifModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml application/xml application/xhtml+xml text/css text/javascript application/javascript application/x-javascript
+</ifModule>
+
+# BEGIN Expire headers
+<ifModule mod_expires.c>
+  ExpiresActive On
+  ExpiresDefault "access plus 1 month"
+  ExpiresByType image/ico "access plus 1 month"
+  ExpiresByType image/jpeg "access plus 1 month"
+  ExpiresByType image/png "access plus 1 month"
+  ExpiresByType image/gif "access plus 1 month"
+  ExpiresByType application/x-shockwave-flash "access plus 1 month"
+  ExpiresByType text/css "access plus 1 month"
+  ExpiresByType text/javascript "access plus 1 month"
+  ExpiresByType application/javascript "access plus 1 month"
+  ExpiresByType application/x-javascript "access plus 1 month"
+
+  ExpiresByType image/x-icon A604800
+  ExpiresByType image/ico A604800
+</ifModule>
+# END Expire headers
+
+<ifModule mod_headers.c>
+  Header set Access-Control-Allow-Origin "*"
+  Header set Access-Control-Allow-Headers: "headers, Origin, X-Requested-With, Content-Type, Accept, Authorization"
+</ifModule>
+# END Cache-Control Headers
+
+php_value session.cookie_httponly 1
+# we need secure cookie before going live 
+php_value session.cookie_secure 0
+
+SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+
+DirectoryIndex index.php
+
+Options +FollowSymlinks
+RewriteEngine on
+RewriteBase /
+DirectorySlash Off
+
+#RewriteRule $ /index.html [R=302,L] 
+###RewriteRule ^(.*)\/(\?.*)?$ $1$2 [R=301,L]
+#RewriteCond %{HTTP_HOST} !^www\.
+
+##  need to change http to https for  Live
+# RewriteCond %{HTTP_HOST} ^[^.]+\.[^.]+$
+# RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [L,R=301]
+
+# RewriteCond %{SERVER_PORT} 80
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L]
+
+#RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
+ErrorDocument 404 /404.php
+
+RewriteRule ^/?$ views/index.php
+RewriteRule ^/user/form?$ action/action.php
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+
+
+php_flag display_errors on
+php_flag display_startup_errors on
+php_flag html_errors on
+php_value docref_root 1
+php_value docref_ext 1
+
+php_value upload_max_filesize 10M
+php_value post_max_size 12M
+php_value max_execution_time 300
+php_value max_input_time 300
