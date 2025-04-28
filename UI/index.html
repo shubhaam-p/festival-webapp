@@ -4,64 +4,106 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Document</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
 	<style>
-
-body,html {
+body{
 	margin: 10px;
-  padding: 0;
-  overflow-x: hidden;
+  	overflow-x: hidden;
 }
 
-div.polaroid img{
-	object-fit: cover;
-	width: 100%;
-	height: 80%;
-}
-div.polaroid {
-  background-color: white;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
-  margin-bottom: 25px;
-  height: 85vh;
-  margin-bottom: 15vh;
+/* @media screen and (min-width: 480px) {
+
+	div:nth-child(1){
+		transform:rotate(5deg);
+	}
+	
+	div:nth-child(2){
+		transform:rotate(0deg);
+	}
+	
+	div:nth-child(3){
+		transform:rotate(-10deg);
+	}
+	
+	div:nth-child(4){
+		transform:rotate(10deg);
+	}
+} */
+
+
+.polaroid{
+  text-align:center;
+  display:inline-block;
+  /* list-style:none; */
+  position:relative;
+  border:solid 12px #fff;
+  background:#fff;
+  box-shadow:0 0 15px 0px #555;
+  transition:all 1s ease;
+  -o-transition:all 1s ease;
+  -moz-transition:all 1s ease;
+  -webkit-transition:all 1s ease;
+  /* top:50px; */
 }
 
-div.container {
-  text-align: center;
+.polaroid img {
+    width: 100%;
+    /* height: 85%; */
+    object-fit: contain;
 }
+
+.container p{
+	margin-top: 1rem;
+}
+
+@media (max-width: 767.98px) {
+      .polaroid {
+		min-height: 85vh;
+        margin-bottom: 15vh;
+      }
+
+	  .polaroid img {
+			width: 100%;
+			height: 85%;
+			object-fit: contain;
+		}
+    }
 </style>
 </head>
 <body>
 
-	<div class="polaroid">
-		<img src="images/img_5terre.jpg" alt="5 Terre" style="width:100%" loading="lazy" >
-		<div class="container">
-		<p>Cinque Terre</p>
+	<div class="container">
+		<div class="row g-4 gx-4">
+			<!-- <div class="cont align-items-center"  style="min-height: 100vh;"> -->
+				<div class="polaroid col-sm-12 col-md-6 col-lg-6 justify-content-center">
+					<img src="https://unsplash.it/300/300" alt="5 Terre" loading="lazy" >
+					<div class="container">
+					<p>Cinque Terre</p>
+					</div>
+				</div>
+			<!-- </div> -->
+			  
+			<div class="polaroid col-sm-12 col-md-6 col-lg-6 justify-content-center">
+				<img src="https://unsplash.it/400/400" alt="Norther Lights" loading="lazy" >
+				<div class="container">
+				<p>Forest</p>
+				</div>
+			</div>
+			<div class="polaroid col-sm-12 col-md-6 col-lg-6 justify-content-center">
+				<img src="https://unsplash.it/500/500" alt="Norther Lights" loading="lazy" >
+				<div class="container">
+				<p>Northern Lights</p>
+				</div>
+			</div>
+			<div class="polaroid col-sm-12 col-md-6 col-lg-6 justify-content-center">
+				<img src="https://unsplash.it/200/200" alt="Norther Lights" loading="lazy" >
+				<div class="container">
+				<p>Paris</p>
+				</div>
+			</div>
 		</div>
 	</div>
-	  
-	<div class="polaroid">
-		<img src="images/img_forest.jpg" alt="Norther Lights" style="width:100%" loading="lazy" >
-		<div class="container">
-		<p>Forest</p>
-		</div>
-	</div>
-	<div class="polaroid">
-		<img src="images/lights.jpg" alt="Norther Lights" style="width:100%" loading="lazy" >
-		<div class="container">
-		<p>Northern Lights</p>
-		</div>
-	</div>
-	<div class="polaroid">
-		<img src="images/paris.jpg" alt="Norther Lights" style="width:100%" loading="lazy" >
-		<div class="container">
-		<p>Paris</p>
-		</div>
-	</div>
-	<div class="polaroid">
-		<img src="images/img_mountains.jpg" alt="Norther Lights" style="width:100%" loading="lazy" >
-		<div class="container">
-		<p>Mountains</p>
-		</div>
-	</div>    
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 </body>
 </html>
