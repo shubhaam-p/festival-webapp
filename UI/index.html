@@ -86,24 +86,35 @@
 		// Swipe up detection (basic touch event)
 		let startY = 0;
 		let isScrolling = false;
+		let isPinching = false;
+
 		window.addEventListener('touchstart', (e) => {
-		startY = e.touches[0].clientY;
+			if (e.touches.length > 1) {
+				isPinching = true; // Pinch gesture
+			} else {
+				isPinching = false;
+				startY = e.touches[0].clientY;
+			}
 		});
 
 		window.addEventListener('touchend', (e) => {
-		const endY = e.changedTouches[0].clientY;
-		const deltaY = startY - endY;
+			if(isScrolling || isPinching) return;
 
-		if (deltaY > 50) {
-			showNextSlide();
-			console.log("touchend - swipe")
-		}
+			const endY = e.changedTouches[0].clientY;
+			const deltaY = startY - endY;
+
+			if (deltaY > 50) {
+				showNextSlide();
+				console.log("touchend - swipe")
+				setTimeout(()=>{
+					isScrolling = false;
+				}, 800);
+			}
 		});
 
 		// Scroll down detection for non-touch devices
 		window.addEventListener('wheel', (e) => {
 			if(isScrolling) return;
-
 			if (e.deltaY > 20) {
 				isScrolling = true;
 				console.log("wheel - swipe")
