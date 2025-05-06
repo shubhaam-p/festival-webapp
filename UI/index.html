@@ -3,7 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Document</title>
+	<title>Gallery</title>
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
 	<style>
 		body, html{
@@ -15,7 +15,7 @@
 		}
 
 		video, audio, img {
-			max-width: 90%;
+			max-width: 100%;
 			max-height: 80vh;
 			object-fit: contain;
 			touch-action: none;
@@ -27,16 +27,25 @@
 			width: 100%;
 			justify-content: center;
 			align-items: center;
-			text-align: center;
-			
+			overflow: hidden;
+			touch-action: none; /* Crucial for proper pinch-zoom */
+			position: relative;
 		}
 
 		.media-slide.active {
 			display: flex;
 		}
+	
+		.zoomable{
+			transform-origin: center center;
+			transition: transform 0.3s ease-out;
+			cursor: zoom-in;
+		}
 
-		.zoomable {
-			transition: transform 0.3s;
+		.media-slide .img-zoom {
+			transform: scale(2.5);
+			z-index: 10;
+			cursor: zoom-out;
 		}
 </style>
 </head>
@@ -44,38 +53,40 @@
 
 	<div class="container">
 		<div class="row g-4">
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6 justify-content-center active">
-				<img src="images/img_5terre.jpg" alt="5 Terre" loading="lazy" class="zoomable">
+			<div class="media-slide active col-sm-12 col-md-6 col-lg-6">
+				<img src="images/rock.jpg" class="zoomable">
+			  </div>
+
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
+				<img src="images/img_5terre.jpg" alt="5 Terre" loading="lazy" class="zoomable" >
 			</div>
 			  
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6 justify-content-center">
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
 				<img src="images/img_mountains.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
 			</div>
 
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6 justify-content-center">
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
 				<img src="images/img_forest.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
 			</div>
 
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6 justify-content-center">
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
 				<img src="images/paris.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
 			</div>
 
 		</div>
 	</div>
 
-	<script src="https://unpkg.com/@panzoom/panzoom/dist/panzoom.min.js"></script>
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
-
 	<script>
 		const slides = document.querySelectorAll('.media-slide');
 		let current = 0;
 	
 		function showNextSlide(){
-			  if (current < slides.length - 1) {
+			if (current < slides.length - 1) {
+				  console.log("inside",slides[current], slides[current+1])
 				slides[current].classList.remove('active');
 				current++;
 				slides[current].classList.add('active');
-				// restPanZoom();
 			  } else {
 				// End of media
 				// document.getElementById('nextBtn').disabled = true;
@@ -127,23 +138,25 @@
 			}, { passive: true }
 		);
 
-		// Enable Panzoom on images and videos
-		document.querySelectorAll('.zoomable').forEach(el => {
-		const panzoom = Panzoom(el, {
-			maxScale: 5,
-			minScale: 1,
-			contain: 'inside',
+		//Zoom
+		const images = document.querySelectorAll('.zoomable');
+		images.forEach(img => {
+			img.addEventListener('click', (e) => {
+				const isZoomed = img.classList.contains('img-zoom');
+				// Remove zoom from all images
+				images.forEach(i => i.classList.remove('img-zoom'));
+
+				if(!isZoomed){
+					const rect = img.getBoundingClientRect();
+					const offsetX = e.clientX - rect.left;
+					const offsetY = e.clientY - rect.top;
+		
+					img.style.transformOrigin = `${offsetX}px ${offsetY}px`;
+					img.classList.toggle('img-zoom');
+				}
+			});
 		});
 
-		// Allow zoom with scroll wheel
-		el.parentElement.addEventListener('wheel', e => {
-			if (e.ctrlKey || e.metaKey || e.altKey) {
-			e.preventDefault();
-			panzoom.zoomWithWheel(e);
-			}
-		}, { passive: false });
-
-		});
 	  </script>
 </body>
 </html>
