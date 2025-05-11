@@ -1,5 +1,5 @@
 <?php
-include "ABSTRACT-DAO.php";
+require $_SERVER['DOCUMENT_ROOT'] . "/dao/ABSTRACT-DAO.php";
 // include_once $_SERVER['DOCUMENT_ROOT'] . '/config.php';
 
 Class MAIN_DAO extends AbstractDAO{
@@ -76,10 +76,10 @@ Class MAIN_DAO extends AbstractDAO{
     function addAuthor($main_dvo){
         $returnVal = 0;
         try {
-            $query="INSERT INTO author (name) VALUES(?)";
+            $query="INSERT INTO author (name, ipaddress) VALUES(?,?)";
             try {
                 $stmt = $this->myslqi->prepare($query);
-                $stmt->bind_param('s', $main_dvo->AUTHORNAME);
+                $stmt->bind_param('ss', $main_dvo->AUTHORNAME, $main_dvo->IPADDR);
             } catch (\Throwable $th) {
                 $this->logException($th);
                 return $returnVal;
@@ -112,6 +112,52 @@ Class MAIN_DAO extends AbstractDAO{
                 $stmt->bind_result($NID, $IMAGEURL);
                 while ($stmt->fetch()) {
                     array_push($returnVal, array('ID'=>$NID, 'IMAGE'=>$IMAGEURL));
+                }
+            } else {
+                $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
+            }
+            $stmt->free_result();
+            $stmt->close();
+        } catch (Exception $e) {
+            $this->logException($e);
+        }
+        return $returnVal;
+    }
+   
+    public function checkIfIPExists($main_dvo) {
+        $returnVal = $count = 0;
+        try {
+            $query = "SELECT count(id) FROM author WHERE ipaddress = ? limit 1";
+            $stmt = $this->myslqi->prepare($query);
+            $stmt->bind_param('s', $main_dvo->IPADDR);
+
+            if ($stmt->execute()) {
+                $stmt->bind_result($count);
+                if ($stmt->fetch()) {
+                    $returnVal = $count;
+                }
+            } else {
+                $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
+            }
+            $stmt->free_result();
+            $stmt->close();
+        } catch (Exception $e) {
+            $this->logException($e);
+        }
+        return $returnVal;
+    }
+   
+    public function getCountOfUploadedFiles($main_dvo) {
+        $returnVal = $count = 0;
+        try {
+            $query = "SELECT count(id) FROM image WHERE authid = ?";
+            $stmt = $this->myslqi->prepare($query);
+            $stmt->bind_param('s', $main_dvo->USERID);
+
+            if ($stmt->execute()) {
+                $stmt->bind_result($count);
+                if ($stmt->fetch()) {
+                    $returnVal = $count;
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');

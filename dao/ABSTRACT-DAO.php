@@ -1,6 +1,6 @@
 <?php
 
-include '../db/DBConnection.php';
+require $_SERVER['DOCUMENT_ROOT'] . '/db/DBConnection.php';
 
 abstract class AbstractDAO
 {

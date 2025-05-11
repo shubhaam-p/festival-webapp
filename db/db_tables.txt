@@ -1,0 +1,19 @@
+CREATE TABLE `author` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) DEFAULT NULL,
+  `ipaddress` varchar(20) DEFAULT NULL,
+  `createdat` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `ip_address_idx` (`ipaddress`)
+)
+
+CREATE TABLE `image` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `authid` int DEFAULT NULL,
+  `image` varchar(255) DEFAULT NULL,
+  `status` tinyint DEFAULT '1',
+  `createdat` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updatedat` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `authid` (`authid`)
+)

@@ -1,0 +1,6 @@
+PROTOCOL=http
+DB_HOST=localhost
+DB_NAME=dbname
+DB_USER=root
+DB_PASS=
+DB_PORT=3306

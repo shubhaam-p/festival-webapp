@@ -18,4 +18,13 @@
 
 
     $CONST_FETCH_IMAGE_LIMIT = 10;
+
+    $CONST_ALLOWED_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'png', 'mp3', 'mp4'];
+    $CONST_TYPE_IMAGE = ['jpg', 'jpeg', 'png'];
+    $CONST_TYPE_OTHER_MEDIA = ['gif', 'png', 'mp3', 'mp4'];
+
+    $STATUS_FIELD_IN_RESPONSE = [
+        '1'=>'Success',
+        '2'=>'Error'
+    ]
 ?>  

@@ -5,5 +5,8 @@
        public $IMAGEURL;
        public $NID;
        public $LIMIT;
+       public $FILEARR;
+       public $IPADDR;
+       public $USERID;
     }
 ?>
