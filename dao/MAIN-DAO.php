@@ -53,10 +53,10 @@ Class MAIN_DAO extends AbstractDAO{
     function addImage($main_dvo){
         $returnVal = 0;
         try {
-            $query="INSERT INTO image (authid, image) VALUES(?, ?)";
+            $query="INSERT INTO media (authid, url, type) VALUES(?, ?, ?)";
             try {
                 $stmt = $this->myslqi->prepare($query);
-                $stmt->bind_param('is', $main_dvo->NID, $main_dvo->IMAGEURL);
+                $stmt->bind_param('isi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE);
             } catch (\Throwable $th) {
                 $this->logException($th);
                 return $returnVal;
@@ -103,7 +103,7 @@ Class MAIN_DAO extends AbstractDAO{
             $limit = "";
             if(isset($main_dvo->LIMIT))
                 $limit = "LIMIT $main_dvo->LIMIT";
-            $query = "SELECT id, image FROM image WHERE status = 1 ORDER BY id DESC $limit";
+            $query = "SELECT id, url FROM meida WHERE status = 1 ORDER BY id DESC $limit";
 
             $stmt = $this->myslqi->prepare($query);
             $IMAGEURL = $NID = array(); 
@@ -148,17 +148,21 @@ Class MAIN_DAO extends AbstractDAO{
     }
    
     public function getCountOfUploadedFiles($main_dvo) {
-        $returnVal = $count = 0;
+        $returnVal = [];
+        $count = $type = $totalCount = 0;
         try {
-            $query = "SELECT count(id) FROM image WHERE authid = ?";
+            $query = " SELECT count(id), type FROM media WHERE authid = ? GROUP BY type";
             $stmt = $this->myslqi->prepare($query);
             $stmt->bind_param('s', $main_dvo->USERID);
 
             if ($stmt->execute()) {
-                $stmt->bind_result($count);
-                if ($stmt->fetch()) {
-                    $returnVal = $count;
+                $stmt->bind_result($count, $type);
+                while ($stmt->fetch()) {
+                    $returnVal[$type] = $count;
+                    if(is_numeric($count))
+                        $totalCount += $count;
                 }
+                $returnVal['3'] = $totalCount;
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
             }

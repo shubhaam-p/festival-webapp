@@ -8,23 +8,23 @@
     $COOKIEDOMAIN = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
     $VER = '0.1';
 
-    //status column
-    $status = [
-        '0'=>'new review',
-        '1'=>'active', //package, review
-        '2'=>'inactive', //package, review
-        '3'=>'remove package, review',
-    ];
-
-
     $CONST_FETCH_IMAGE_LIMIT = 10;
 
-    $CONST_ALLOWED_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'png', 'mp3', 'mp4'];
+    $CONST_ALLOWED_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'mp4'];
     $CONST_TYPE_IMAGE = ['jpg', 'jpeg', 'png'];
-    $CONST_TYPE_OTHER_MEDIA = ['gif', 'png', 'mp3', 'mp4'];
+    $CONST_TYPE_OTHER_MEDIA = ['gif', 'mp3', 'mp4'];
 
     $STATUS_FIELD_IN_RESPONSE = [
         '1'=>'Success',
         '2'=>'Error'
-    ]
+    ];
+
+    $TYPE_COLUMN_IN_MEDIA_TABLE = [
+        '1'=>'Image',
+        '2'=>'Video, gif, audio'
+    ];
+
+    $MAX_FILE_COUNT_FOR_EACH_TYPE = 2;
+
+    $COOKIE_EXPIRY_TIME = 3600 * 30; //time is in seconds 
 ?>  

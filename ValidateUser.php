@@ -7,20 +7,18 @@
         }
 
         //Check IP exists in DB
-        $IPExists = $countOfUploadedFiles = 0;
+        $IPExists = 0;
+        $dataOfUploadedFiles = [];
         $main_dvo->IPADDR = $functions->getUserIP();
         $IPExists = $main_dao->checkIfIPExists($main_dvo);
-        error_log("ip add".$main_dvo->IPADDR);
-        if(isset($_COOKIE['media_count']) && $_COOKIE['media_count'] >=4){
-            //do nothing and submit the form
-        }
-        
-        if(isset($_SESSION['userId'])){
+
+        if(isset($_COOKIE['userId']) || isset($_SESSION['userId'])){
             //Get count of files uploaded
-            $main_dvo->USERID = $_SESSION['userId'];
-            $countOfUploadedFiles = $main_dao->getCountOfUploadedFiles($main_dvo);
-            if($countOfUploadedFiles >=4)
-                throw new Exception("Session is present, max files (count: $countOfUploadedFiles) are uploaded and form is submitted. User Id - $main_dvo->USERID");
+            $main_dvo->USERID = isset($_COOKIE['userId'])? $_COOKIE['userId'] : $_SESSION['userId'];
+            $dataOfUploadedFiles = $main_dao->getCountOfUploadedFiles($main_dvo);
+
+            if(isset($dataOfUploadedFiles[3])  && $dataOfUploadedFiles[3] >=4)
+                throw new Exception("Session is present, max files (count: $dataOfUploadedFiles[3]) are uploaded and form is previously submitted. User Id - $main_dvo->USERID");
         }else if (!empty($IPExists)) {
             throw new Exception("IP address is found and form is submitted.");
         }

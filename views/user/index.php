@@ -59,6 +59,7 @@
                                                     <ul>
                                                         <li>Up to 2 images allowed</li>
                                                         <li>Each image must be 500KB or smaller</li>
+                                                        <li>Only these extensions are allowed - <b>'jpg', 'jpeg', 'png'</b></li>
                                                     </ul>
                                                 </div>
                                                 <div class="col-6">
@@ -66,6 +67,7 @@
                                                     <ul>
                                                         <li> Up to 2 files allowed</li>
                                                         <li>Each file must be 1MB or smaller</li>
+                                                        <li>Only these extensions are allowed - <b> 'gif', 'mp3', 'mp4'</b></li>
                                                     </ul>
                                                 </div>
                                             </div>

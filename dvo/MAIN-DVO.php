@@ -8,5 +8,6 @@
        public $FILEARR;
        public $IPADDR;
        public $USERID;
+       public $MEDIATYPE;
     }
 ?>
