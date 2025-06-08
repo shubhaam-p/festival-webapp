@@ -85,23 +85,41 @@ $('form[id="uploadMediaForm"]').validate({
         const actionURL = 'addMedia';
 
         let msg = ``;
+        let videoMetaData = '';
         let authorName = $("#authorName").val();
         let files = document.getElementById("imageInput").files;
 
-        const queryXML = `<?xml version='1.0'?>`
+        let queryXML = `<?xml version='1.0'?>`
             + `<query>`
             + `<action>${actionURL}</action>`
             + getXMLString(XML_PARAMETER_AUTHORNAME, () => authorName)
             + `</query>`;
 
         let formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            if (files[i] && files[i].type.startsWith('video/')) {
+                videoMetaData = await getVideoMetadata(files[i]);
+                console.log("Width:", videoMetaData.width);
+                console.log("Height:", videoMetaData.height);
+                console.log("Duration:", videoMetaData.duration);
+                
+                // videoDetails = '<video>';
+                // videoDetails += `<height>${videoMetaData.width}</height><width>${videoMetaData.height}</width><duration>${videoMetaData.duration}</duration>`;
+                // videoDetails += `</video>`;
+                formData.append("width", videoMetaData.width);
+                formData.append("height", videoMetaData.height);
+                formData.append("duration", videoMetaData.duration);
+                formData.append("file[]", files[i]);
+                // queryXML += videoDetails;
+            
+                // console.log("vide ",videoDetails);
+            }else
+                formData.append("file[]", files[i]);
+        }
+
+
         formData.append("xmlData", queryXML);
         formData.append("action", actionURL);
-
-        for (let i = 0; i < files.length; i++) {
-            // formData.append("media[]", files[i]); // use same name (media[]) for PHP array
-            formData.append("file[]", files[i]);
-        }
         await makeAjaxCall({
         url: `${webURL}/new-cont-reg`,
         method: "POST",
@@ -125,7 +143,7 @@ $('form[id="uploadMediaForm"]').validate({
                 
             } else{
                 msg = `<div>${res.message}</div>`;
-                $('.submit-response-msg').empty().show().html(`<b class='fs-16 text-red'>Error while submitting the form!!<b> ${msg}`).delay(delayInSec).fadeOut(300);
+                $('.submit-response-msg').empty().show().html(`<b class='fs-16 text-red'>Error while submitting the form!!<b> <div>${msg}</div>`).delay(delayInSec).fadeOut(300);
             } 
             onclickError('submitFormButton');
         })
@@ -135,5 +153,29 @@ $('form[id="uploadMediaForm"]').validate({
         }
     }  
 });
+
+function getVideoMetadata(file) {
+  return new Promise((resolve, reject) => {
+    const video = document.createElement("video");
+
+    video.preload = "metadata";
+    video.src = URL.createObjectURL(file);
+
+    video.onloadedmetadata = () => {
+      URL.revokeObjectURL(video.src); // Clean up memory
+
+      resolve({
+        width: video.videoWidth,
+        height: video.videoHeight,
+        duration: video.duration
+      });
+    };
+
+    video.onerror = () => {
+      reject(new Error("Invalid video file"));
+    };
+  });
+}
+
 
 });

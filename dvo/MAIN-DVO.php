@@ -9,5 +9,8 @@
        public $IPADDR;
        public $USERID;
        public $MEDIATYPE;
+       public $TEMPFNAME;
+       public $FILESIZE;
+       public $MIMETYPE;
     }
 ?>

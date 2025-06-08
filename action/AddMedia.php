@@ -35,7 +35,7 @@
         
         // Normalize inputs
         $main_dvo->FILEARR = (array)$_FILES['file']['name'];
-        $fileTmpNames = (array)$_FILES['file']['tmp_name'];
+        $main_dvo->TEMPFNAME = $fileTmpNames = (array)$_FILES['file']['tmp_name'];
         $fileErrors = (array)$_FILES['file']['error'];
         $fileSizes = (array)$_FILES['file']['size'];
         try {
@@ -44,9 +44,12 @@
             }
  
             //Sanitize file names and get count of media group wise
-            $returnData = $functions->validateFileNTypes($main_dvo, $CONST_TYPE_IMAGE, $CONST_TYPE_OTHER_MEDIA);
+            $returnData = $functions->validateFileNTypes($main_dvo, $CONST_MIME_TYPE_IMAGE, $CONST_MIME_TYPE_OTHER_MEDIA);
             $imageCount = $returnData[0];
             $otherMediaCount = $returnData[1];
+            $MIMEArr = $returnData[2];
+            $notAllowedMediaArr = $returnData[3];
+            $notAllowedFileNoArr = array_keys($notAllowedMediaArr);
 
             if($imageCount > $MAX_FILE_COUNT_FOR_EACH_TYPE || $otherMediaCount > $MAX_FILE_COUNT_FOR_EACH_TYPE){
                 throw new Exception($errorMsg);
@@ -65,18 +68,23 @@
 
             //Validate uploaded media and upload.
             for ($i = 0; $i < count($main_dvo->FILEARR); $i++) {
+                $storeStatus = 0;
                 $originalName = $main_dvo->FILEARR[$i];
                 $fileName = basename($originalName);
-                
+                //To get MIME type
+                $main_dvo->MIMETYPE = $MIMEArr[$i];
+
                 //For unique name of file
                 $fileName = date_format($date, "Ymd_His") . "_" . rand(1000, 9999) . "." . pathinfo($fileName, PATHINFO_EXTENSION);
                 $targetFilePath = $targetDir . $fileName;
-                $fileType = strtolower(pathinfo($targetFilePath, PATHINFO_EXTENSION));
-                if (!in_array($fileType, $CONST_ALLOWED_TYPES)) { 
+
+                //Check for invalid file types
+                if (in_array($i, $notAllowedFileNoArr)) { 
                     $uploadStatus[] = [
                         'file' => $originalName,
                         'status' => 2,
-                        'message' => "Invalid file type: $originalName"
+                        'message' => "Invalid file type: $originalName",
+                        'MIME type' => $notAllowedMediaArr[$i]  
                     ];
                     continue;
                 }
@@ -90,7 +98,7 @@
                     continue;
                 }
 
-                if ((in_array($fileType, $CONST_TYPE_IMAGE) && $fileSizes[$i] > $maxFileSizeImage) || (in_array($fileType, $CONST_TYPE_OTHER_MEDIA) && $fileSizes[$i] > $maxFileSizeOtherMedia)) {
+                if ((in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_IMAGE) && $fileSizes[$i] > $maxFileSizeImage) || (in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_OTHER_MEDIA) && $fileSizes[$i] > $maxFileSizeOtherMedia)) {
                     $uploadStatus[] = [
                         'file' => $originalName,
                         'status' => 2,
@@ -114,18 +122,32 @@
                 }
 
                 if (move_uploaded_file($fileTmpNames[$i], $targetFilePath)) {
-                    array_push($uploadedImg, $originalName);
-                    $main_dvo->MEDIATYPE = in_array($fileType, $CONST_TYPE_IMAGE)? 1 : 0;
-                    $main_dvo->MEDIATYPE = in_array($fileType, $CONST_TYPE_OTHER_MEDIA)? 2 : $main_dvo->MEDIATYPE;
+                    $main_dvo->MEDIATYPE = in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_IMAGE)? 1 : 0;
+                    $main_dvo->MEDIATYPE = in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_OTHER_MEDIA)? 2 : $main_dvo->MEDIATYPE;
                     $main_dvo->IMAGEURL = $webURL . "uploads/" . $fileName;
+
+                    //To get file size
+                    $main_dvo->FILESIZE = $fileSizes[$i]; // In bytes
+                    // $main_dvo->FILESIZE = round($fileSize / 1024 / 1024, 2); // In MB
+
+                    $functions->getMediaDimensions($targetFilePath, $main_dvo->MIMETYPE);
                     
                     //Store the URL in DB
-                    $main_dao->addImage($main_dvo);
+                    $storeStatus = $main_dao->storeMedia($main_dvo);
+                    if(empty($storeStatus)){
+                        $uploadStatus[] = [
+                            'file' => $originalName,
+                            'status' => 2,
+                            'message' => "Error occurred while processing this file : $originalName"
+                        ];
+                    }else
+                        array_push($uploadedImg, $originalName);
+
                 } else {
                     $uploadStatus[] = [
                         'file' => $originalName,
                         'status' => 2,
-                        'message' => "Failed to move uploaded file: $originalName"
+                        'message' => "Failed to process uploaded file: $originalName"
                     ];
                 }
             }
@@ -155,9 +177,17 @@
                 $uploadStatus[] = [
                     'status' => 1,
                     'data' => implode(',',$uploadedImg),
-                    'message' => "Successfully Uploaded file:"
+                    'message' => "Successfully Uploaded file"
                 ];
             }
+
+            //This block is not needed as there is upload status for every file
+            // else{
+            //     $uploadStatus[] = [
+            //         'status' => 2,
+            //         'message' => "Error occurred while processing the request!"
+            //     ];
+            // }
 
             $returnArray = [
                 'status'=> 1,

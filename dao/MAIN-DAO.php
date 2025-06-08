@@ -50,13 +50,13 @@ Class MAIN_DAO extends AbstractDAO{
 
     }
 
-    function addImage($main_dvo){
-        $returnVal = 0;
+    function storeMedia($main_dvo){
+        $returnVal = $default = 0;
         try {
-            $query="INSERT INTO media (authid, url, type) VALUES(?, ?, ?)";
+            $query="INSERT INTO media (authid, url, type, height, width, mimetype, filesize) VALUES(?, ?, ?, ?, ?, ?, ?)";
             try {
                 $stmt = $this->myslqi->prepare($query);
-                $stmt->bind_param('isi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE);
+                $stmt->bind_param('isiiisi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE, $default, $default, $main_dvo->MIMETYPE, $main_dvo->FILESIZE);
             } catch (\Throwable $th) {
                 $this->logException($th);
                 return $returnVal;

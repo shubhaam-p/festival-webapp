@@ -7,22 +7,26 @@ class Functions{
         return htmlentities(trim(strip_tags($str)), ENT_NOQUOTES, 'UTF-8');
     }
 
-    function validateFileNTypes($main_dvo, $CONST_TYPE_IMAGE, $CONST_TYPE_OTHER_MEDIA){
+    function validateFileNTypes($main_dvo, $CONST_MIME_TYPE_IMAGE, $CONST_MIME_TYPE_OTHER_MEDIA){
         $imageCount = $otherMediaCount = 0;
+        $mimeArr = $notAllowedMedia = [];
 
-        foreach($main_dvo->FILEARR as $key => $value){
-            //Sanitie file name
-            $fn = $this->sanitizeInput(preg_replace("/[^a-zA-Z0-9\._-]/", "_", basename($value)));
+        foreach($main_dvo->TEMPFNAME as $key => $value){            
 
-            if(in_array(pathinfo($fn, PATHINFO_EXTENSION), $CONST_TYPE_IMAGE))
+            $finfo = finfo_open(FILEINFO_MIME_TYPE);
+            $mimeType = finfo_file($finfo, $value);
+            finfo_close($finfo);
+            $mimeArr[$key] = $mimeType;
+
+            if(in_array($mimeType, $CONST_MIME_TYPE_IMAGE))
                 $imageCount++;
-            else if(in_array(pathinfo($fn, PATHINFO_EXTENSION), $CONST_TYPE_OTHER_MEDIA))
+            else if(in_array($mimeType, $CONST_MIME_TYPE_OTHER_MEDIA))
                 $otherMediaCount++;
-
-            $main_dvo->FILEARR[$key] = $value;
+            else
+                $notAllowedMedia[$key] = $mimeType;
         }
-
-        return [$imageCount, $otherMediaCount];
+        //count of Images, otherType(Video, audio, GIF), Mime Array for storing, not allowed media for throwing the error.
+        return [$imageCount, $otherMediaCount, $mimeArr, $notAllowedMedia];
     }
 
     function getUserIP() {

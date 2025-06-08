@@ -13,6 +13,10 @@
     $CONST_ALLOWED_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'mp4'];
     $CONST_TYPE_IMAGE = ['jpg', 'jpeg', 'png'];
     $CONST_TYPE_OTHER_MEDIA = ['gif', 'mp3', 'mp4'];
+    
+    $CONST_ALLOWED_MIME = ['image/jpeg', 'image/png', 'image/gif', 'audio/mpeg', 'audio/mp4'];
+    $CONST_MIME_TYPE_IMAGE = ['image/jpeg', 'image/png'];
+    $CONST_MIME_TYPE_OTHER_MEDIA = ['image/gif', 'audio/mpeg', 'video/mp4'];
 
     $STATUS_FIELD_IN_RESPONSE = [
         '1'=>'Success',
