@@ -56,7 +56,7 @@ Class MAIN_DAO extends AbstractDAO{
             $query="INSERT INTO media (authid, url, type, height, width, mimetype, filesize) VALUES(?, ?, ?, ?, ?, ?, ?)";
             try {
                 $stmt = $this->myslqi->prepare($query);
-                $stmt->bind_param('isiiisi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE, $default, $default, $main_dvo->MIMETYPE, $main_dvo->FILESIZE);
+                $stmt->bind_param('isiiisi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE, $main_dvo->HEIGHT, $main_dvo->WIDTH, $main_dvo->MIMETYPE, $main_dvo->FILESIZE);
             } catch (\Throwable $th) {
                 $this->logException($th);
                 return $returnVal;
@@ -103,15 +103,15 @@ Class MAIN_DAO extends AbstractDAO{
             $limit = "";
             if(isset($main_dvo->LIMIT))
                 $limit = "LIMIT $main_dvo->LIMIT";
-            $query = "SELECT id, url FROM meida WHERE status = 1 ORDER BY id DESC $limit";
+            $query = "SELECT id, url, height, width, mimetype FROM media WHERE status = 1 ORDER BY id DESC $limit";
 
             $stmt = $this->myslqi->prepare($query);
-            $IMAGEURL = $NID = array(); 
+            $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = array(); 
 
             if ($stmt->execute()) {
-                $stmt->bind_result($NID, $IMAGEURL);
+                $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE);
                 while ($stmt->fetch()) {
-                    array_push($returnVal, array('ID'=>$NID, 'IMAGE'=>$IMAGEURL));
+                    array_push($returnVal, array('ID'=>$NID, 'media'=>$MEDIAURL,  'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE));
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');

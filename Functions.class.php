@@ -34,5 +34,27 @@ class Functions{
             ?? $_SERVER['HTTP_X_FORWARDED_FOR']
             ?? $_SERVER['REMOTE_ADDR'];
     }
+
+    function getMediaDimensions($filePath, $mimeType, $videoDetails = []){
+        $details = [];
+        $type = 0;
+        switch (explode('/', $mimeType)[0]) {
+            case 'image':
+                    $details = getimagesize($filePath);
+                    $type = 1; 
+                break;
+                case 'video':
+                    $details = $videoDetails;
+                    $type = 2; 
+                break;
+            // case 'audio':
+            // @todo
+            //     Using ID3 library, see if its required and more imp is, if it works on server. 
+            //     break;
+            default:
+                echo "Unsupported format";
+        }
+        return [$type, $details];
+    }
 }
 ?>

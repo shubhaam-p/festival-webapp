@@ -41,28 +41,6 @@ function getCookie(name) {
   return null;
 }
 
-async function makeAjaxCall({url, method = "GET", data}) {
-    return new Promise((resolve, reject) => {
-        const isFormData = data instanceof FormData;
-        const ajaxOptions = {
-            url: url,
-            method: method,
-            data: data,
-            processData: !isFormData,
-            contentType: isFormData ? false : "application/x-www-form-urlencoded; charset=UTF-8",
-            success: function(data) {
-                resolve(JSON.parse(data));
-            },
-            error: function(error) {
-                reject(error);
-            },
-        };
-        $.ajax(ajaxOptions).fail(function(error) {
-            reject(error);
-        });
-    });
-}
-
 $('form[id="uploadMediaForm"]').validate({  
     rules: {  
         authorName: 'required',
@@ -86,6 +64,7 @@ $('form[id="uploadMediaForm"]').validate({
 
         let msg = ``;
         let videoMetaData = '';
+        let videoFileCount = 0;
         let authorName = $("#authorName").val();
         let files = document.getElementById("imageInput").files;
 
@@ -102,28 +81,26 @@ $('form[id="uploadMediaForm"]').validate({
                 console.log("Width:", videoMetaData.width);
                 console.log("Height:", videoMetaData.height);
                 console.log("Duration:", videoMetaData.duration);
-                
-                // videoDetails = '<video>';
-                // videoDetails += `<height>${videoMetaData.width}</height><width>${videoMetaData.height}</width><duration>${videoMetaData.duration}</duration>`;
-                // videoDetails += `</video>`;
-                formData.append("width", videoMetaData.width);
-                formData.append("height", videoMetaData.height);
-                formData.append("duration", videoMetaData.duration);
-                formData.append("file[]", files[i]);
-                // queryXML += videoDetails;
-            
-                // console.log("vide ",videoDetails);
-            }else
-                formData.append("file[]", files[i]);
+               
+                formData.append(`width_${i}`, videoMetaData.width);
+                formData.append(`height_${i}`, videoMetaData.height);
+                formData.append(`duration_${i}`, videoMetaData.duration);
+                // formData.append(`video_${i}`, files[i]);
+                videoFileCount++;
+            }
+            formData.append("file[]", files[i]);
         }
 
 
         formData.append("xmlData", queryXML);
         formData.append("action", actionURL);
+        if(videoFileCount > 0)
+            formData.append("videoFileCount", videoFileCount);
+
         await makeAjaxCall({
-        url: `${webURL}/new-cont-reg`,
-        method: "POST",
-        data: formData,
+            url: `${webURL}/new-cont-reg`,
+            method: "POST",
+            data: formData,
         }).then((res)=>{
             console.log("response ",res);
             if (res.status === 1) {

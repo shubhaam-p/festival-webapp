@@ -15,7 +15,7 @@ try {
 
     $CONST_PRODUCT_DOMAIN           = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : getenv('VALID_PRODUCT_DOMAIN'); // domain with fallback, will remove else part later
     $webURL                         = $PROTOCOL."://".$CONST_PRODUCT_DOMAIN."/" ; 
-
+    error_log("webuelr ".$webURL);
 }
 catch (Exception $e) {
     //exception handling code goes here

@@ -12,13 +12,27 @@
     require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
 
     $returnArray = $uploadedImg = [];
-    $save = $error = $msg = '';
+    $save = $error = $msg = $videoFileCount = '';
     $queryXML = str_replace("\'", "'", $_REQUEST["xmlData"]);
     $xml = simplexml_load_string(htmlspecialchars_decode($queryXML));
     
     $result = $xml->xpath("//author");
     if(isset($result[0]) && $result[0] != null){
         $main_dvo->AUTHORNAME = $functions->sanitizeInput(trim($result[0]));
+    }
+    
+    $result = isset($_POST["videoFileCount"])?$_POST["videoFileCount"]:0;
+    if(!empty($result[0]) && $result[0] !== ''){
+        $videoFileCount = $functions->sanitizeInput(trim($result[0]));
+    }
+
+    $videoDimArr = [];
+    $videoFileCount = isset($videoFileCount) && ($videoFileCount > 0) ? $videoFileCount : 0;
+    for($i = 0; $i < $videoFileCount; $i++){
+        $width = isset($_POST["width_$i"])? $_POST["width_$i"] : 0;
+        $height = isset($_POST["height_$i"])? $_POST["height_$i"] : 0;
+        $duration = isset($_POST["duration_$i"])? $_POST["duration_$i"] : 0;
+        $videoDimArr[$i] = ['width'=>$width, 'height'=>$height, 'duration'=>$duration];
     }
 
     $returnArray = [];
@@ -58,12 +72,27 @@
             //Checking No. of uploaded files previously and No. of files submitted by user now
             if(count($dataOfUploadedFiles) > 0){
                 // check Images
-                if(isset($dataOfUploadedFiles[1]) && ($dataOfUploadedFiles[1] + $imageCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE)
-                    throw new Exception("You have already uploaded ". $dataOfUploadedFiles[1] ." image files. Now you can only upload ".($MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[1]) ." image files");
-            
+                if(isset($dataOfUploadedFiles[1]) && ($dataOfUploadedFiles[1] + $imageCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE){
+                    $msg = "You have already uploaded ". $dataOfUploadedFiles[1] ." image files. ";
+                    $remainingLimit = $MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[1];
+                    if($remainingLimit > 0)
+                        $msg .= "Now you can only upload ".($remainingLimit) ." image files";
+                    else
+                        $msg .= "You can not upload this type of file";
+                    
+                    throw new Exception($msg);
+                }
                 //check Videos, audio
-                if(isset($dataOfUploadedFiles[2]) && ($dataOfUploadedFiles[2] + $otherMediaCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE)
-                    throw new Exception("You have already uploaded ". $dataOfUploadedFiles[2] ." Audio, Video or GIF files. Now you can only upload ".($MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[2]) ." Audio, Video or GIF files");
+                if(isset($dataOfUploadedFiles[2]) && ($dataOfUploadedFiles[2] + $otherMediaCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE){
+                    $msg = "You have already uploaded ". $dataOfUploadedFiles[2] ." Audio, Video or GIF files. ";
+                    $remainingLimit = $MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[2];
+                    if($remainingLimit > 0)
+                        $msg .="Now you can only upload ".($remainingLimit) ." Audio or Video or GIF files";
+                    else
+                        $msg .="You can not upload this type of file";
+
+                    throw new Exception($msg);
+                }
             }
 
             //Validate uploaded media and upload.
@@ -129,9 +158,18 @@
                     //To get file size
                     $main_dvo->FILESIZE = $fileSizes[$i]; // In bytes
                     // $main_dvo->FILESIZE = round($fileSize / 1024 / 1024, 2); // In MB
-
-                    $functions->getMediaDimensions($targetFilePath, $main_dvo->MIMETYPE);
-                    
+                    $videoDim = isset($videoDimArr[$i]) ? $videoDimArr[$i]:[];
+                    $mediaDimensions = $functions->getMediaDimensions($targetFilePath, $main_dvo->MIMETYPE, $videoDim);
+                    $whatType = $mediaDimensions[0];
+                    $dimensions = $mediaDimensions[1];
+                    if($whatType == 1){
+                        $main_dvo->HEIGHT = isset($dimensions[0])?$dimensions[0]:0;
+                        $main_dvo->WIDTH = isset($dimensions[1])?$dimensions[1]:0;
+                    }elseif($whatType == 2){
+                        $main_dvo->HEIGHT = isset($dimensions['height'])?$dimensions['height']:0;
+                        $main_dvo->WIDTH = isset($dimensions['width'])?$dimensions['width']:0;
+                        // $duration = isset($dimensions['duration'])?$dimensions['duration']:0;
+                    }
                     //Store the URL in DB
                     $storeStatus = $main_dao->storeMedia($main_dvo);
                     if(empty($storeStatus)){

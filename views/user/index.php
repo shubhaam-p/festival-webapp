@@ -27,9 +27,9 @@
     <div class="container-fluid pb-5">
         <div class="container py-5">
             <div class="text-center mb-3">
-                <h1 class="text-primary text-uppercase" style="letter-spacing: 5px;">Share your experience</h1>
+                <h1 class="text-primary text-uppercase" style="letter-spacing: 5px;">Share your Memories</h1>
                 <p>
-                    Your feedback is important to us, helps us to improve!
+                    subtitle
                 </p>
             </div>                      
             <div class="row justify-content-center">
@@ -99,6 +99,7 @@
 
 
     <!-- custom JS -->
+     <script src="<?php echo $webURL;?>reckStatic/js/common.js"></script>
      <script src="<?php echo $webURL;?>reckStatic/js/UI-development.js"></script>
 </body>
 </html>

@@ -59,7 +59,9 @@ RewriteRule ^new-cont-reg$ controller/Controller.php?n=$1 [NC,L,QSA]
 
 # RewriteRule ^/?$ views/index.php
 RewriteRule ^/?$ views/user/index.php
-RewriteRule ^/user/form?$ action/action.php
+RewriteRule ^gallery?$ views/user/gallery.php
+RewriteRule ^user/form?$ action/action.php
+RewriteRule ^new-cont-reg?$ controller/controller.php
 
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d

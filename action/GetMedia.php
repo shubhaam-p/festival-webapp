@@ -1,18 +1,33 @@
 <?php
+    if(!isset($_GET['Type']) || $_GET['Type'] != 'Gall3ry') {
+        $returnArray['save'] = 0;
+        $returnArray['error'] = 1;
+        $returnArray['msg'] = 'Invalid Request';
+        echo json_encode($returnArray);
+        exit();
+    }
+
     include "../Constants.php";
     include '../dvo/MAIN-DVO.php';
     include '../dao/MAIN-DAO.php';
     include '../Functions.class.php';
-
+    
+    //Can use this to list media for admin
+    $isHomePage = '';
+    $returnArray = $data = [];
+    
     $main_dvo = new MAIN_DVO();
     $main_dao = new MAIN_DAO();
     $functions = new Functions();
+    
+    if(isset($_GET['home']) && $_GET['home'] != '') {
+        $isHomePage = $functions->sanitizeInput($_GET['home']);
+    }
 
-// error_log("xmlData ".print_r($_REQUEST["xmlData"],1)." -- ".__DIR__ );
-    $returnArray = $data = [];
-
-    $main_dvo->LIMIT = $CONST_FETCH_IMAGE_LIMIT;
-    $data = $main_dao->getImages($main_dvo);
+    if(!empty($isHomePage)){
+        $main_dvo->LIMIT = $CONST_FETCH_IMAGE_LIMIT;
+        $data = $main_dao->getImages($main_dvo);
+    }
     if(count($data) > 0){
         $returnArray = [
             'status' => 'success',
@@ -28,8 +43,5 @@
     }
 
     echo json_encode($returnArray);
-    // echo $msg;
     exit();
-
-        //&lt;?xml version='1.0'?&gt; &lt;query id='addPackageDetails'&gt;&lt;author&gt;name&lt;/author&gt;&lt;/query&gt;
 ?>

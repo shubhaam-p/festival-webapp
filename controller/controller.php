@@ -2,7 +2,7 @@
 
 $maxPostSize = 4000 * 1024; // 4 MB limit
 
-if ($_SERVER['CONTENT_LENGTH'] > $maxPostSize) {
+if (isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > $maxPostSize) {
     // http_response_code(413); // Payload Too Big
     $returnArray = [
         'status'=>2,
@@ -29,6 +29,7 @@ set_exception_handler('myExceptionHandler');
 
 $arrActions=array();
 $arrActions['addMedia'] 			= '../action/AddMedia.php';
+$arrActions['listMedia'] 			= '../action/GetMedia.php';
 
 $action = $_REQUEST['action'];
 if($arrActions[$action]) {

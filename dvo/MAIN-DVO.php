@@ -12,5 +12,7 @@
        public $TEMPFNAME;
        public $FILESIZE;
        public $MIMETYPE;
+       public $HEIGHT;
+       public $WIDTH;
     }
 ?>
