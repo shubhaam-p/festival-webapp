@@ -90,6 +90,16 @@ video, audio, img {
 	align-items: center;
 }
 
+/* .waveform-container {
+  width: 100%;
+  max-width: 800px; 
+  margin: auto;
+}
+
+.waveform {
+  width: 100%;
+} */
+
 </style>
 <body>
 
@@ -104,7 +114,7 @@ video, audio, img {
 					<button id="playPause-1" class="playPause" data-id="1">
 						<img src="/images/play.png" alt="play">
 					</button>
-					<div class="audio-container" style="width:400px">
+					<div class="waveform-container" style="width:60%">
 						<div id="waveform-1" class="waveform" style="display: none;"></div>
 					</div>
 				</div>
@@ -241,6 +251,7 @@ video, audio, img {
 				   barGap: 1,
 				   barRadius: 2,
 				   url: "URL",    
+				   responsive: true
 			   }
 	
 				options.url= audioURL
