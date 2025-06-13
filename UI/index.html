@@ -4,161 +4,196 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Gallery</title>
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
-	<style>
-		body, html{
-			margin: 0;
-			padding: 0;
-			height: 100%;
-			/* overflow: hidden; */
-			font-family: sans-serif;
-			overflow-y: auto;
-			overscroll-behavior: auto
-		}
-
-		video, audio, img {
-			max-width: 100%;
-			max-height: 80vh;
-			object-fit: contain;
-			/* #touch-action: none; */
-		}
-
-		.media-slide {
-			display: none;
-			min-height: 100vh;
-			width: 100%;
-			justify-content: center;
-			align-items: center;
-			overflow: hidden;
-			/* touch-action: none;  */
-			position: relative;
-		}
-
-		.media-slide.active {
-			display: flex;
-		}
-	
-		.zoomable{
-			transform-origin: center center;
-			transition: transform 0.3s ease-out;
-			cursor: zoom-in;
-		}
-
-		.media-slide .img-zoom {
-			transform: scale(2.5);
-			z-index: 10;
-			cursor: zoom-out;
-		}
-</style>
+	<link href="../reckStatic/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
+	<link rel="stylesheet" href="../reckStatic/css/gallery.css">
 </head>
 <body>
 
 	<div class="container">
 		<div class="row g-4">
 			<div class="media-slide active col-sm-12 col-md-6 col-lg-6">
-				<img src="images/rock.jpg" class="zoomable">
-			  </div>
+				<img src="../UI/images/rock.jpg" class="zoomable">
+			</div>
 
 			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="images/img_5terre.jpg" alt="5 Terre" loading="lazy" class="zoomable" >
+				<div class="audio-wrapper">
+					<button id="playPause-1" class="playPause" data-id="1">
+						<img src="../reckStatic/images/play.png" alt="play">
+					</button>
+					<div class="audio-container" style="width:400px">
+						<div id="waveform-1" class="waveform" style="display: none;"></div>
+					</div>
+				</div>
+			</div>
+
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
+				<img src="../UI/images/img_5terre.jpg" alt="5 Terre" loading="lazy" class="zoomable" >
 			</div>
 			  
 			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="images/img_mountains.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
+				<video src="../UI/images/20250609_203457_6868.mp4" controls class="zoomable"></video>
 			</div>
 
 			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="images/img_forest.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
+				<img src="../UI/images/img_mountains.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
 			</div>
 
 			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="images/paris.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
+				<img src="../UI/images/img_forest.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
+			</div>
+
+			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
+				<img src="../UI/images/paris.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
 			</div>
 
 		</div>
 	</div>
 
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
+	<script src="../reckStatic/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
+    <script src="../reckStatic/js/jquery-3.4.1.min.js"></script>
+	<script src="https://unpkg.com/wavesurfer.js@7"></script>
+
 	<script>
-		const slides = document.querySelectorAll('.media-slide');
-		let current = 0;
-	
-		function showNextSlide(){
-			if (current < slides.length - 1) {
-				  console.log("inside",slides[current], slides[current+1])
-				slides[current].classList.remove('active');
-				current++;
-				slides[current].classList.add('active');
-			  } else {
-				// End of media
-				// document.getElementById('nextBtn').disabled = true;
-				console.log("You've reached the end of the exhibition!");
-			  }
-		}
+		$(document).ready(async function () {
 
-		// Swipe up detection (basic touch event)
-		let startY = 0;
-		let isScrolling = false;
-		let isPinching = false;
+			const slides = document.querySelectorAll('.media-slide');
+			let current = 0;
+		
+			function showNextSlide(){
+				if (current < slides.length - 1) {
+					// console.log("inside",slides[current], slides[current+1])
+					slides[current].classList.remove('active');
+					current++;
+					slides[current].classList.add('active');
+				} else {
+					// End of media
+					// document.getElementById('nextBtn').disabled = true;
+					console.log("You've reached the end of the exhibition!");
+				}
 
-		window.addEventListener('touchstart', (e) => {
-			if (e.touches.length > 1) {
-				isPinching = true; // Pinch gesture
-			} else {
-				isPinching = false;
-				startY = e.touches[0].clientY;
+				//delete instance to free up memory
+				if(current == 2){
+					wavesurfer[1].destroy();
+					delete wavesurfer[1];
+				}
 			}
-		});
 
-		window.addEventListener('touchend', (e) => {
-			if(isScrolling || isPinching) return;
+			// Swipe up detection (basic touch event)
+			let startY = 0;
+			let isScrolling = false;
+			let isPinching = false;
 
-			const endY = e.changedTouches[0].clientY;
-			const deltaY = startY - endY;
+			window.addEventListener('touchstart', (e) => {
+				if (e.touches.length > 1) {
+					isPinching = true; // Pinch gesture
+				} else {
+					isPinching = false;
+					startY = e.touches[0].clientY;
+				}
+			});
 
-			if (deltaY > 50) {
-				showNextSlide();
-				console.log("touchend - swipe")
+			window.addEventListener('touchend', (e) => {
+				if(isScrolling || isPinching) return;
+
+				const endY = e.changedTouches[0].clientY;
+				const deltaY = startY - endY;
+
+				if (deltaY > 50) {
+					showNextSlide();
+					console.log("touchend - swipe")
+					setTimeout(()=>{
+						isScrolling = false;
+					}, 800);
+				}
+			});
+
+			// Scroll down detection for non-touch devices
+			window.addEventListener('wheel', (e) => {
+				if(isScrolling) return;
+				if (e.deltaY > 20) {
+					isScrolling = true;
+					console.log("wheel - swipe")
+					showNextSlide();	
+				}
 				setTimeout(()=>{
 					isScrolling = false;
 				}, 800);
-			}
-		});
+				
+				}, { passive: true }
+			);
 
-		// Scroll down detection for non-touch devices
-		window.addEventListener('wheel', (e) => {
-			if(isScrolling) return;
-			if (e.deltaY > 20) {
-				isScrolling = true;
-				console.log("wheel - swipe")
-				showNextSlide();	
-			}
-			setTimeout(()=>{
-				isScrolling = false;
-			}, 800);
+			//Zoom
+			const images = document.querySelectorAll('.zoomable');
+			images.forEach(img => {
+				img.addEventListener('dblclick', (e) => {
+					const isZoomed = img.classList.contains('img-zoom');
+					// Remove zoom from all images
+					images.forEach(i => i.classList.remove('img-zoom'));
+
+					if(!isZoomed){
+						const rect = img.getBoundingClientRect();
+						const offsetX = e.clientX - rect.left;
+						const offsetY = e.clientY - rect.top;
 			
-			}, { passive: true }
-		);
-
-		//Zoom
-		const images = document.querySelectorAll('.zoomable');
-		images.forEach(img => {
-			img.addEventListener('click', (e) => {
-				const isZoomed = img.classList.contains('img-zoom');
-				// Remove zoom from all images
-				images.forEach(i => i.classList.remove('img-zoom'));
-
-				if(!isZoomed){
-					const rect = img.getBoundingClientRect();
-					const offsetX = e.clientX - rect.left;
-					const offsetY = e.clientY - rect.top;
-		
-					img.style.transformOrigin = `${offsetX}px ${offsetY}px`;
-					img.classList.toggle('img-zoom');
-				}
+						img.style.transformOrigin = `${offsetX}px ${offsetY}px`;
+						img.classList.toggle('img-zoom');
+					}
+				});
 			});
-		});
 
+			var wavesurfer = [];
+
+			function createWavesOfAudio(audioURL, ID = 0){
+				ID = parseInt(ID);
+				const options = {
+				   container: 'id',
+				   waveColor: '#ababab',
+				   progressColor: '#0025d1',
+				   cursorColor:'#ddd5e9',
+				   cursorWidth: 2,
+				   height:200,
+				   interact: true,
+				   barWidth: 3,
+				   barGap: 1,
+				   barRadius: 2,
+				   url: "URL",    
+			   }
+	
+				options.url= audioURL
+				options.container='#waveform-'+ID;
+				wavesurfer[ID] = WaveSurfer.create(options)
+	
+				loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
+				$('.waveform').css('display','none')
+				$(loadingText).insertAfter('.waveform')
+				
+				wavesurfer[ID].on('ready',()=>{
+					$('#waveform-'+ID+' + p').remove()
+					$('#waveform-'+ID).css('display','block')
+				})
+		
+				wavesurfer[ID].on('finish', () => {
+					$('#playPause-'+ID).children()[0].src = `../reckStatic/images/play.png`
+				});
+			}
+	
+			 $('.playPause').click(function(){
+				elementId = this.id;
+				// console.log(this);
+				actualId = parseInt(this.getAttribute('data-id'));
+				console.log(elementId, actualId);
+
+				if(!wavesurfer[actualId].isPlaying())
+					$('#playPause-'+actualId).children()[0].src = `../reckStatic/images/pause.png`
+				else 
+					$('#playPause-'+actualId).children()[0].src = `../reckStatic/images/play.png`
+
+				wavesurfer[actualId].playPause()
+			})
+
+			createWavesOfAudio('../UI/images/20250613_162617_2296.mp3',1);
+
+		});
 	  </script>
 </body>
 </html>
