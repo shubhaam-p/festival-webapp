@@ -54,26 +54,6 @@
 	<div class="container">
 		<div class="row g-4">
             <div id="media-list"></div>
-			<!-- <div class="media-slide active col-sm-12 col-md-6 col-lg-6">
-				<img src="../UI/images/rock.jpg" class="zoomable">
-			  </div>
-
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="../UI/images/img_5terre.jpg" alt="5 Terre" loading="lazy" class="zoomable" >
-			</div>
-			  
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="../UI/images/img_mountains.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
-			</div>
-
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="../UI/images/img_forest.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
-			</div>
-
-			<div class="media-slide col-sm-12 col-md-6 col-lg-6">
-				<img src="../UI/images/paris.jpg" alt="Norther Lights" loading="lazy" class="zoomable">
-			</div> -->
-
 		</div>
 	</div>
     <script>
@@ -81,45 +61,62 @@
     </script>
     <script src="<?php echo $webURL;?>reckStatic/js/jquery-3.4.1.min.js"></script>
 	<script src="<?php echo $webURL;?>reckStatic/js/bootstrap.bundle.min.js"  crossorigin="anonymous"></script>
-	<script src="https://unpkg.com/wavesurfer.js@7"></script>
+	<script src="<?php echo $webURL;?>reckStatic/js/wavesurfer.min.js"></script>
 
 	<script src="<?php echo $webURL;?>reckStatic/js/common.js"  crossorigin="anonymous"></script>
 	<script src="<?php echo $webURL;?>reckStatic/js/UI-user.js"  crossorigin="anonymous"></script>
 	<script>
-		// const options = {
-		// 	container: document.getElementById('media-list'),
-		// 	barWidth: 7,
-		// 	waveColor: 'rgb(226, 226, 226)',
-		// 	progressColor: 'rgb(46, 33, 223)',
-		// 	url: 'http://www.festival-album.com/uploads/20250613_083003_7706.mp3',
-		// }
-		// const wavesurfer = WaveSurfer.create(options)
-
-		// wavesurfer.on('click', () => {
-		// wavesurfer.play()
-		// })
-
-		const slides = document.querySelectorAll('.media-slide');
+    $(document).ready(async function () {
+		const mediaList = document.getElementById("media-list");
+		mediaList.innerHTML = "";
+		let result = cls = '';
 		let current = 0;
-	
-		function showNextSlide(){
-			if (current < slides.length - 1) {
-				console.log("inside",slides[current], slides[current+1])
-				slides[current].classList.remove('active');
-				current++;
-				slides[current].classList.add('active');
-			  } else {
-				// End of media
-				// document.getElementById('nextBtn').disabled = true;
-				console.log("You've reached the end of the exhibition!");
-			  }
-		}
-
-		// Swipe up detection (basic touch event)
 		let startY = 0;
 		let isScrolling = false;
 		let isPinching = false;
 
+		const AppState = {
+			slides: {},
+			wavesurfer: []
+		};
+
+		let obj = {
+			imageDoneValue: 0,
+			totalMediaCountValue: NaN,
+			letMeKnow() {
+				if(obj.imageDone == 1 && !isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
+					AppState.slides = document.querySelectorAll('.media-slide');
+				}
+			},
+			get imageDone() {
+				return this.imageDoneValue;
+			},
+			set imageDone(value) {
+				this.imageDoneValue = value;
+				this.letMeKnow();
+			},
+			get totalMediaCount() {
+				return this.totalMediaCountValue;
+			},
+			set totalMediaCount(value) {
+				this.totalMediaCountValue = value;
+				this.letMeKnow();
+			}
+		}
+
+		function showNextSlide(){
+			if (current < AppState.slides.length - 1) {
+				console.log("inside",AppState.slides[current], AppState.slides[current+1])
+				AppState.slides[current].classList.remove('active');
+				current++;
+				AppState.slides[current].classList.add('active');
+			} else {
+				// End of media
+				console.log("You've reached the end of the exhibition!");
+			}
+		}
+
+		// Swipe up detection (basic touch event)
 		window.addEventListener('touchstart', (e) => {
 			if (e.touches.length > 1) {
 				isPinching = true; // Pinch gesture
@@ -178,123 +175,145 @@
 			});
 		});
 
-        //Fetch images
-        $(document).ready(async function () {
-			var wavesurfer = [];
+		//Fetch images
+		await listGalleryMediaFiles().then((result)=>{
+			if(result?.total == 0){
+				let div = document.createElement("div");
+				div.innerHTML = '<div>Packages are currenly unavailable!</div>';
+				mediaList.append(div);
+			}else{
+				let mediaFile = result.data;
+				let imageArr = result.imageArr;
+				let imageArrData = imageArr.data;
+				let imageArrCount = imageArr.total;
+				obj.totalMediaCount = result.total;				
+				i = j = 0;
 
-            const mediaList = document.getElementById("media-list");
-            mediaList.innerHTML = "";
-            let result = '';
-            await listGalleryMediaFiles().then((result)=>{
-				// result.total = 0;
-				if(result?.total == 0){
+				while(imageArrCount > 0){
+					let file = file1 = file2 = ''; 
+					let cls = '';
 					let div = document.createElement("div");
-					div.innerHTML = '<div>Packages are currenly unavailable!</div>';
-					mediaList.append(div);
-				}else{
-					let mediaFile = result.data; 
-					for(let i = 0; i < result.total; i++){
+					div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
+					cls = imageArrData[j].CLASS !='' || imageArrData[j].CLASS != 'undefined'? imageArrData[j].CLASS:'';
+
+					if(j==0)
+						div.classList.add("active");
+
+					if(imageArrCount >= 2){
+						file1 = `<img src="${imageArrData[j].MEDIA}" class="zoomable ${cls}">`;
+						file2 = `<img src="${imageArrData[j+1].MEDIA}" class="zoomable ${cls}">`;
+						imageArrCount -=2;
+						j +=2;
+					}else{
+						file1 = `<img src="${imageArrData[j].MEDIA}" class="zoomable ${cls}">`;
+						imageArrCount--;
+						j++;
+					}
+					file += file1 + file2;
+					mediaList.appendChild(div);
+					div.innerHTML = file;
+				}
+
+				if(imageArrCount <= 0){
+					obj.imageDone=1;
+					obj.totalMediaCount -= imageArr.total;
+
+					while(obj.totalMediaCount > 0){
 						let isAudio = 0;	
 						let div = document.createElement("div");
-						div.classList.add("media-slide", "active", "col-sm-12", "col-md-6", "col-lg-6", "media-container"); // Bootstrap row
-						// console.log('mffd ' ,mediaFile[1]);
-						let cls = mediaFile[i].CLASS !='' || mediaFile[i].CLASS != 'undefined'? mediaFile[i].CLASS:'';
+						div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
+						if(i==0 && imageArr.total <=0)
+							div.classList.add("active");
+
+						cls = mediaFile[i]?.CLASS !='' || mediaFile[i]?.CLASS != 'undefined'? mediaFile[i].CLASS:'';
 						let mimeType = mediaFile[i].MIMETYPE.split('/');
-						let file = ''; 
+
 						switch(mimeType[0]){
-							case 'image':
-								file = `<img src="${mediaFile[i].MEDIA}" class="zoomable ${cls}">`;
-								
-								break;
 							case 'video':
 								file = `<video src="${mediaFile[i].MEDIA}" class="zoomable ${cls}" controls></video>`;
 								break;
+
 							case 'audio':
 								isAudio = 1;
-								let screenwidth = window.innerWidth;
-								// file = `<audio src="${mediaFile[i].MEDIA}" class="zoomable ${cls}" controls></audio>`;
+								// let screenwidth = window.innerWidth;
 								file = `
-											<div class="audio-wrapper" data-id="${mediaFile[i].ID}">
-												<button id="playPause-${mediaFile[i].ID}" class="playPause" data-id="${mediaFile[i].ID}">
-													<img src="${webURL}reckStatic/images/play.png" alt="play">
-												</button>
-												<div class="audio-container" style="width:400px">
-													<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
-												</div>
+										<div class="audio-wrapper" data-id="${mediaFile[i].ID}">
+											<button id="playPause-${mediaFile[i].ID}" class="playPause" data-id="${mediaFile[i].ID}">
+												<img src="${webURL}reckStatic/images/play.png" alt="play">
+											</button>
+											<div class="audio-container" style="width:400px">
+												<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
 											</div>
-								`
+										</div>`;
+
 								div.innerHTML = file;
 								mediaList.appendChild(div);
 								createWavesOfAudio(mediaFile[i].MEDIA, mediaFile[i].ID);
+								i++;
+								obj.totalMediaCount --;
 
 								break;
 							default:
 								console.log('unspported format');
 						}
-
 						if(isAudio != 1){
 							// Append images to row
 							div.innerHTML = file;
 							mediaList.appendChild(div);
+							i++;
+							obj.totalMediaCount-- ;
 						}
-					}
+					} 
 				}
-            });
-
-			function createWavesOfAudio(audioURL, ID = 0){
-				ID = parseInt(ID);
-				const options = {
-				   container: 'id',
-				   waveColor: '#ababab',
-				   progressColor: '#0025d1',
-				   cursorColor:'#ddd5e9',
-				   cursorWidth: 2,
-				   height:200,
-				   interact: true,
-				   barWidth: 3,
-				   barGap: 1,
-				   barRadius: 2,
-				   url: "URL",    
-			   }
-	
-				options.url= audioURL
-				options.container='#waveform-'+ID;
-				wavesurfer[ID] = WaveSurfer.create(options)
-	
-				loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
-				$('.waveform').css('display','none')
-				$(loadingText).insertAfter('.waveform')
-				
-				wavesurfer[ID].on('ready',()=>{
-					$('#waveform-'+ID+' + p').remove()
-					$('#waveform-'+ID).css('display','block')
-				})
-		
-				wavesurfer[ID].on('finish', () => {
-					$('#playPause-'+ID).children()[0].src = `${webURL}reckStatic/images/play.png`
-				});
 			}
-	
-			 $('.playPause').click(function(){
-				elementId = this.id;
-				console.log(this);
-				actualId = parseInt(this.getAttribute('data-id'));
-				console.log(elementId, actualId);
+		});
 
-				if(!wavesurfer[actualId].isPlaying())
-					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/pause.png`
-				else 
-					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/play.png`
+		function createWavesOfAudio(audioURL, ID = 0){
+			ID = parseInt(ID);
+			const options = {
+				container: 'id',
+				waveColor: '#ababab',
+				progressColor: '#0025d1',
+				cursorColor:'#ddd5e9',
+				cursorWidth: 2,
+				height:200,
+				interact: true,
+				barWidth: 3,
+				barGap: 1,
+				barRadius: 2,
+				url: "URL",    
+			}
 
-				// $('#playPause'+playerNo).children()[0].src = `${CONST_RECKSRC}${CONST_THEME_D}web/img/ph_play-fill.png`
-	
-				wavesurfer[actualId].playPause()
+			options.url= audioURL
+			options.container='#waveform-'+ID;
+			AppState.wavesurfer[ID] = WaveSurfer.create(options)
+
+			loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
+			$('.waveform').css('display','none')
+			$(loadingText).insertAfter('.waveform')
+			
+			AppState.wavesurfer[ID].on('ready',()=>{
+				$('#waveform-'+ID+' + p').remove()
+				$('#waveform-'+ID).css('display','block')
 			})
-        });
+	
+			AppState.wavesurfer[ID].on('finish', () => {
+				$('#playPause-'+ID).children()[0].src = `${webURL}reckStatic/images/play.png`
+			});
+		}
 
+		$('.playPause').click(function(){
+			elementId = this.id;
+			actualId = parseInt(this.getAttribute('data-id'));
 
-  
-	  </script>
+			if(!AppState.wavesurfer[actualId].isPlaying())
+				$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/pause.png`
+			else 
+				$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/play.png`
+
+			AppState.wavesurfer[actualId].playPause()
+		})
+    });
+</script>
 </body>
 </html>
-<!-- {"status":"success","message":"Fetched successfully!","data":[{"ID":12,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_203905_5000.png","HEIGHT":340,"WIDTH":587,"MIMETYPE":"image\/png"},{"ID":11,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_203703_5936.png","HEIGHT":508,"WIDTH":402,"MIMETYPE":"image\/png"},{"ID":10,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_203614_6665.mp4","HEIGHT":720,"WIDTH":1280,"MIMETYPE":"video\/mp4"},{"ID":9,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_203457_6868.mp4","HEIGHT":0,"WIDTH":0,"MIMETYPE":"video\/mp4"},{"ID":8,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_203123_9737.png","HEIGHT":0,"WIDTH":0,"MIMETYPE":"image\/png"},{"ID":7,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_202658_6444.png","HEIGHT":0,"WIDTH":0,"MIMETYPE":"image\/png"},{"ID":6,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_202315_6686.png","HEIGHT":0,"WIDTH":0,"MIMETYPE":"image\/png"},{"ID":5,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_201913_5633.png","HEIGHT":0,"WIDTH":0,"MIMETYPE":"image\/png"},{"ID":4,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250609_000818_9690.mp4","HEIGHT":0,"WIDTH":0,"MIMETYPE":"video\/mp4"},{"ID":3,"IMAGE":"http:\/\/www.festival-album.com\/uploads\/20250608_193655_1462.mp4","HEIGHT":0,"WIDTH":0,"MIMETYPE":"video\/mp4"}]} -->

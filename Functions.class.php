@@ -50,9 +50,9 @@ class Functions{
             // case 'audio':
             // @todo
             //     Using ID3 library, see if its required and more imp is, if it works on server. 
-            //     break;
+                // break;
             default:
-                echo "Unsupported format";
+                error_log("Unsupported format");
         }
         return [$type, $details];
     }

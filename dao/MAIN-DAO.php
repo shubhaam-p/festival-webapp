@@ -98,20 +98,24 @@ Class MAIN_DAO extends AbstractDAO{
     }
 
     public function getImages($main_dvo) {
-        $returnVal = [];
+        $returnVal = $imageArr = [];
         try {
             $limit = "";
             if(isset($main_dvo->LIMIT))
                 $limit = "LIMIT $main_dvo->LIMIT";
-            $query = "SELECT id, url, height, width, mimetype FROM media WHERE status = 1 ORDER BY id DESC $limit";
+            $query = "SELECT id, url, height, width, mimetype, type FROM media WHERE status = 1 ORDER BY id DESC $limit";
 
             $stmt = $this->myslqi->prepare($query);
-            $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = array(); 
-
+            $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = $TYPE = array(); 
+            $CLASS = '';
             if ($stmt->execute()) {
-                $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE);
+                $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE, $TYPE);
                 while ($stmt->fetch()) {
-                    array_push($returnVal, array('ID'=>$NID, 'media'=>$MEDIAURL,  'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE));
+                    $CLASS = $WIDTH > $HEIGHT ? 'landscape':'portrait';
+                    if($TYPE == 1){
+                        array_push($imageArr, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
+                    }else
+                        array_push($returnVal, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
@@ -121,7 +125,7 @@ Class MAIN_DAO extends AbstractDAO{
         } catch (Exception $e) {
             $this->logException($e);
         }
-        return $returnVal;
+        return [$returnVal, $imageArr];
     }
    
     public function checkIfIPExists($main_dvo) {

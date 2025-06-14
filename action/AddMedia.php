@@ -41,8 +41,8 @@
 
         $webPaths = [];
         $uploadStatus = []; // To store per-file success or error
-        $maxFileSizeImage = 500 * 1024; // 500 KB
-        $maxFileSizeOtherMedia = 1000 * 1024; // 1Mb
+        $maxFileSizeImage = $MAX_FILE_SIZE_IMAGE;
+        $maxFileSizeOtherMedia = $MAX_FILE_SIZE_IMAGE;
         $imageCount = $otherMediaCount = 0;
         $errorMsg = "You can upload up to four files; 2 images and 2 audio, video or gif files. Please refer to guildlines.";
         $date = date_create("now",timezone_open("Asia/Kolkata"));

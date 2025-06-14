@@ -31,4 +31,10 @@
     $MAX_FILE_COUNT_FOR_EACH_TYPE = 2;
 
     $COOKIE_EXPIRY_TIME = 3600 * 30; //time is in seconds 
+
+    $MAX_FILE_SIZE_IMAGE = 500 * 1024; // 500 KB
+    $MAX_FILE_SIZE_OTHER_MEDIA = 1000 * 1024; // 1Mb
+
+    $MAX_POST_SIZE = 4000 * 1024; // 4 MB limit ***not in use**
+
 ?>  

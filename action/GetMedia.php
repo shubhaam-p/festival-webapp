@@ -26,19 +26,24 @@
 
     if(!empty($isHomePage)){
         $main_dvo->LIMIT = $CONST_FETCH_IMAGE_LIMIT;
+        // return format- array, 0 - all other data, 1 - image data
         $data = $main_dao->getImages($main_dvo);
     }
-    if(count($data) > 0){
+    if(count($data[0]) > 0 || count($data[1]) > 0){
+        $totalCnt = count($data[0]) + count($data[1]);
         $returnArray = [
             'status' => 'success',
             'message' => "Fetched successfully!",
-            'data' => $data
+            'data' => $data[0],
+            'imageArr' => ['data'=>$data[1], 'total'=>count($data[1])],
+            'total' => $totalCnt,
         ];
     }else{
         $returnArray = [
             'status' => 'error',
             'message' => "Data not found!",
-            'data' => $data
+            'data' => $data,
+            'total' => 0
         ];
     }
 
