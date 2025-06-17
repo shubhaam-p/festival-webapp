@@ -19,7 +19,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Form</title>
 	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style.css">
 	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/css2.css">
 </head>
@@ -73,7 +73,7 @@
                                             </div>
                                         </div>
                                      </label>
-                                    <input type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*" multiple>
+                                    <input class="form-control" type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*" multiple>
                                 </div>
                             </div>
 
