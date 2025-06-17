@@ -10386,3 +10386,8 @@ h6,
 .fs-small{
   font-size: 80%;;
 }
+
+#imageInput, #imageInput:active{
+    border: none !important;
+    outline: none;
+}
