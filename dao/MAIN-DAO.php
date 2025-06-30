@@ -53,10 +53,10 @@ Class MAIN_DAO extends AbstractDAO{
     function storeMedia($main_dvo){
         $returnVal = $default = 0;
         try {
-            $query="INSERT INTO media (authid, url, type, height, width, mimetype, filesize) VALUES(?, ?, ?, ?, ?, ?, ?)";
+            $query="INSERT INTO media (authid, url, caption, type, height, width, mimetype, filesize) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
             try {
                 $stmt = $this->myslqi->prepare($query);
-                $stmt->bind_param('isiiisi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->MEDIATYPE, $main_dvo->HEIGHT, $main_dvo->WIDTH, $main_dvo->MIMETYPE, $main_dvo->FILESIZE);
+                $stmt->bind_param('issiiisi', $main_dvo->USERID, $main_dvo->IMAGEURL, $main_dvo->CAPTION, $main_dvo->MEDIATYPE, $main_dvo->HEIGHT, $main_dvo->WIDTH, $main_dvo->MIMETYPE, $main_dvo->FILESIZE);
             } catch (\Throwable $th) {
                 $this->logException($th);
                 return $returnVal;
@@ -98,7 +98,7 @@ Class MAIN_DAO extends AbstractDAO{
     }
 
     public function getImages($main_dvo) {
-        $returnVal = $imageArr = [];
+        $returnVal = [];
         try {
             $limit = "";
             if(isset($main_dvo->LIMIT))
@@ -112,10 +112,7 @@ Class MAIN_DAO extends AbstractDAO{
                 $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE, $TYPE);
                 while ($stmt->fetch()) {
                     $CLASS = $WIDTH > $HEIGHT ? 'landscape':'portrait';
-                    if($TYPE == 1){
-                        array_push($imageArr, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
-                    }else
-                        array_push($returnVal, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
+                    array_push($returnVal, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
@@ -125,7 +122,7 @@ Class MAIN_DAO extends AbstractDAO{
         } catch (Exception $e) {
             $this->logException($e);
         }
-        return [$returnVal, $imageArr];
+        return $returnVal;
     }
    
     public function checkIfIPExists($main_dvo) {

@@ -9,7 +9,7 @@ function onclickError(clickid) {
 
 function onclickLoading(clickid) {
     $('#'+clickid).hide();
-    $('<div id="submit_load"><image width="18" height="18" src="'+webURL+'reckStatic/loading.gif"/></div>').insertAfter($('#'+clickid));
+    $('<div id="submit_load"><image width="18" height="18" src="'+webURL+'reckStatic/images/loading.gif"/></div>').insertAfter($('#'+clickid));
 }
 
 function handleLoadingBtnIssue(btnName='', waitTime=10000 ){  
@@ -60,18 +60,21 @@ $('form[id="uploadMediaForm"]').validate({
         $('.submit-response-msg').show();
         // Constants for XML parameters
         const XML_PARAMETER_AUTHORNAME = "author";
+        const XML_PARAMETER_CAPTION = "caption";
         const actionURL = 'addMedia';
 
         let msg = ``;
         let videoMetaData = '';
         let videoFileCount = 0;
         let authorName = $("#authorName").val();
+        let caption = $("#caption").val();
         let files = document.getElementById("imageInput").files;
 
         let queryXML = `<?xml version='1.0'?>`
             + `<query>`
             + `<action>${actionURL}</action>`
             + getXMLString(XML_PARAMETER_AUTHORNAME, () => authorName)
+            + getXMLString(XML_PARAMETER_CAPTION, () => caption)
             + `</query>`;
 
         let formData = new FormData();
@@ -106,6 +109,7 @@ $('form[id="uploadMediaForm"]').validate({
             if (res.status === 1) {
                 // $("#uploadMediaForm")[0].reset();
                 $("#imageInput").val(null)
+                $("#caption").val(null)
                 console.log("reset form")
                 if(res.data.length>0){
                     res.data.forEach((i)=>{

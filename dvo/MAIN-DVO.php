@@ -14,5 +14,6 @@
        public $MIMETYPE;
        public $HEIGHT;
        public $WIDTH;
+       public $CAPTION;
     }
 ?>

@@ -11,44 +11,6 @@
 	<link href="<?php echo $webURL;?>reckStatic/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo $webURL;?>reckStatic/css/gallery.css">
 </head>
-<style>
- .media-container {
-  width: 100%;
-  max-width: 500px;
-  margin: auto;
-  overflow: hidden;
-  border-radius: 10px;
-  background-color: #f2f2f2;
-}
-
-.media-container img,
-.media-container video {
-  display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-}
-
-/* Tweak portrait images */
-.media-container.portrait img,
-.media-container.portrait video {
-  max-height: 500px;
-  width: auto;
-  margin: 0 auto;
-}
-
-.playPause{
-	height: 45px;
-	width: 45px;
-	border: none;
-}
-
-.audio-wrapper{
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-}
-</style>
 <body>
 
 	<div class="container">
@@ -74,18 +36,20 @@
 		let startY = 0;
 		let isScrolling = false;
 		let isPinching = false;
-
+		let pauseScrollTimeInSec = 2000;//Pause the scrolling after media scrolled
 		const AppState = {
 			slides: {},
-			wavesurfer: []
+			wavesurfer: new Map()
 		};
 
 		let obj = {
 			imageDoneValue: 0,
 			totalMediaCountValue: NaN,
 			letMeKnow() {
-				if(obj.imageDone == 1 && !isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
+				console.log('total ',obj.totalMediaCount);
+				if(!isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
 					AppState.slides = document.querySelectorAll('.media-slide');
+					addLoader();
 				}
 			},
 			get imageDone() {
@@ -107,9 +71,33 @@
 		function showNextSlide(){
 			if (current < AppState.slides.length - 1) {
 				console.log("inside",AppState.slides[current], AppState.slides[current+1])
+				
+		    	const datatype = $(AppState.slides[current]).find('.audio-wrapper').attr('data-type') ?? '';
+				console.log('datatype ',datatype, AppState.wavesurfer)
+				switch (datatype) {
+					case 'audio':
+						let id = $(AppState.slides[current]).find('.audio-wrapper').attr('data-id') ?? 0;
+						id = id!==0? parseInt(id):0;
+						const instance = AppState.wavesurfer.get(id);
+						console.log('audio type file swiped -- destroy ',id)
+						if (instance && id) {
+							console.log("destroy WS instance")
+							instance.destroy();
+							AppState.wavesurfer.delete(id);
+							console.log(`Destroyed WaveSurfer: ${id}`, AppState.wavesurfer);
+						}
+						break;
+				
+					default:
+						console.log("default switch")
+						break;
+				}
+
+				//Added this after switch block because, switch was deleting next instance rather than current
 				AppState.slides[current].classList.remove('active');
 				current++;
 				AppState.slides[current].classList.add('active');
+				AppState.slides[current].scrollIntoView({ behavior: "smooth", block: "start" });
 			} else {
 				// End of media
 				console.log("You've reached the end of the exhibition!");
@@ -137,7 +125,7 @@
 				console.log("touchend - swipe")
 				setTimeout(()=>{
 					isScrolling = false;
-				}, 800);
+				}, pauseScrollTimeInSec);
 			}
 		});
 
@@ -151,7 +139,7 @@
 			}
 			setTimeout(()=>{
 				isScrolling = false;
-			}, 800);
+			}, pauseScrollTimeInSec);
 			
 			}, { passive: true }
 		);
@@ -183,87 +171,54 @@
 				mediaList.append(div);
 			}else{
 				let mediaFile = result.data;
-				let imageArr = result.imageArr;
-				let imageArrData = imageArr.data;
-				let imageArrCount = imageArr.total;
 				obj.totalMediaCount = result.total;				
 				i = j = 0;
 
-				while(imageArrCount > 0){
-					let file = file1 = file2 = ''; 
-					let cls = '';
+				for(let i = 0; i < result.total; i++){
+					let isAudio = 0;	
 					let div = document.createElement("div");
 					div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
-					cls = imageArrData[j].CLASS !='' || imageArrData[j].CLASS != 'undefined'? imageArrData[j].CLASS:'';
-
-					if(j==0)
+					if(i==0)
 						div.classList.add("active");
 
-					if(imageArrCount >= 2){
-						file1 = `<img src="${imageArrData[j].MEDIA}" class="zoomable ${cls}">`;
-						file2 = `<img src="${imageArrData[j+1].MEDIA}" class="zoomable ${cls}">`;
-						imageArrCount -=2;
-						j +=2;
-					}else{
-						file1 = `<img src="${imageArrData[j].MEDIA}" class="zoomable ${cls}">`;
-						imageArrCount--;
-						j++;
+					let cls = mediaFile[i].CLASS !='' || mediaFile[i].CLASS != 'undefined'? mediaFile[i].CLASS:'';
+					let mimeType = mediaFile[i].MIMETYPE.split('/');
+					let file = ''; 
+					switch(mimeType[0]){
+						case 'image':
+							file = `<img src="${mediaFile[i].MEDIA}" class="${cls}" data-type="image" loading="lazy">`;
+							break;
+
+						case 'video':
+							file = `<video src="${mediaFile[i].MEDIA}" class="${cls}" data-type="video" controls></video>`;
+							break;
+
+						case 'audio':
+							isAudio = 1;
+							// let screenwidth = window.innerWidth;
+							file = `
+									<div class="audio-wrapper" data-id="${mediaFile[i].ID}" data-type="audio">
+										<button id="playPause-${mediaFile[i].ID}" class="playPause" data-id="${mediaFile[i].ID}">
+											<img src="${webURL}reckStatic/images/play.png" alt="play">
+										</button>
+										<div class="audio-container" style="width:400px">
+											<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
+										</div>
+									</div>`;
+
+							break;
+						default:
+							console.log('unspported format');
 					}
-					file += file1 + file2;
-					mediaList.appendChild(div);
+
+					// Append images to row
 					div.innerHTML = file;
-				}
+					mediaList.appendChild(div);
 
-				if(imageArrCount <= 0){
-					obj.imageDone=1;
-					obj.totalMediaCount -= imageArr.total;
-
-					while(obj.totalMediaCount > 0){
-						let isAudio = 0;	
-						let div = document.createElement("div");
-						div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
-						if(i==0 && imageArr.total <=0)
-							div.classList.add("active");
-
-						cls = mediaFile[i]?.CLASS !='' || mediaFile[i]?.CLASS != 'undefined'? mediaFile[i].CLASS:'';
-						let mimeType = mediaFile[i].MIMETYPE.split('/');
-
-						switch(mimeType[0]){
-							case 'video':
-								file = `<video src="${mediaFile[i].MEDIA}" class="zoomable ${cls}" controls></video>`;
-								break;
-
-							case 'audio':
-								isAudio = 1;
-								// let screenwidth = window.innerWidth;
-								file = `
-										<div class="audio-wrapper" data-id="${mediaFile[i].ID}">
-											<button id="playPause-${mediaFile[i].ID}" class="playPause" data-id="${mediaFile[i].ID}">
-												<img src="${webURL}reckStatic/images/play.png" alt="play">
-											</button>
-											<div class="audio-container" style="width:400px">
-												<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
-											</div>
-										</div>`;
-
-								div.innerHTML = file;
-								mediaList.appendChild(div);
-								createWavesOfAudio(mediaFile[i].MEDIA, mediaFile[i].ID);
-								i++;
-								obj.totalMediaCount --;
-
-								break;
-							default:
-								console.log('unspported format');
-						}
-						if(isAudio != 1){
-							// Append images to row
-							div.innerHTML = file;
-							mediaList.appendChild(div);
-							i++;
-							obj.totalMediaCount-- ;
-						}
-					} 
+					if(isAudio == 1){
+						createWavesOfAudio(mediaFile[i].MEDIA, mediaFile[i].ID);
+					}
+					obj.totalMediaCount--;
 				}
 			}
 		});
@@ -286,18 +241,19 @@
 
 			options.url= audioURL
 			options.container='#waveform-'+ID;
-			AppState.wavesurfer[ID] = WaveSurfer.create(options)
+			const wsInstance =  WaveSurfer.create(options);
+			AppState.wavesurfer.set(ID, wsInstance);
 
 			loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
 			$('.waveform').css('display','none')
 			$(loadingText).insertAfter('.waveform')
 			
-			AppState.wavesurfer[ID].on('ready',()=>{
+			wsInstance.on('ready',()=>{
 				$('#waveform-'+ID+' + p').remove()
 				$('#waveform-'+ID).css('display','block')
 			})
 	
-			AppState.wavesurfer[ID].on('finish', () => {
+			wsInstance.on('finish', () => {
 				$('#playPause-'+ID).children()[0].src = `${webURL}reckStatic/images/play.png`
 			});
 		}
@@ -306,13 +262,46 @@
 			elementId = this.id;
 			actualId = parseInt(this.getAttribute('data-id'));
 
-			if(!AppState.wavesurfer[actualId].isPlaying())
-				$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/pause.png`
-			else 
-				$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/play.png`
+        	const instance = AppState.wavesurfer.get(actualId);
 
-			AppState.wavesurfer[actualId].playPause()
+			if(instance){
+				if(!instance.isPlaying())
+					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/pause.png`
+				else 
+					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/play.png`
+			}
+			instance.playPause()
 		})
+
+		//Add skeleton loader instaed of rounf
+		function addLoader(){
+			AppState.slides.forEach(item => {
+			const loader = document.createElement('div');
+			loader.className = 'loader';
+			item.appendChild(loader);
+
+			const media = item.querySelector('img, video, audio');
+
+			if (media.tagName === 'IMG') {
+				media.onload = () => {
+				item.classList.add('loaded');
+				loader.remove();
+				};
+			} else if (media.tagName === 'VIDEO' || media.tagName === 'AUDIO') {
+				media.onloadeddata = () => {
+				item.classList.add('loaded');
+				loader.remove();
+				};
+			}
+
+			// Lazy load src if using data-src
+			if (media.dataset.src) {
+				media.src = media.dataset.src;
+				media.removeAttribute('data-src');
+			}
+			});
+
+		}
     });
 </script>
 </body>

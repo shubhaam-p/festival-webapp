@@ -1,5 +1,16 @@
 <?php
     session_start();
+    $returnArray = $uploadedImg = [];
+
+    if (isset($_FILES["file"]) && is_countable($_FILES["file"]) && count($_FILES)>1) {
+          $returnArray = [
+            'status'=> 2,
+            'message'=> 'Please upload one file at a time'
+        ];
+        echo json_encode($returnArray);
+        exit();
+    }
+
     require "../Constants.php";
     require '../dvo/MAIN-DVO.php';
     require '../dao/MAIN-DAO.php';
@@ -11,7 +22,6 @@
 
     require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
 
-    $returnArray = $uploadedImg = [];
     $save = $error = $msg = $videoFileCount = '';
     $queryXML = str_replace("\'", "'", $_REQUEST["xmlData"]);
     $xml = simplexml_load_string(htmlspecialchars_decode($queryXML));
@@ -19,6 +29,11 @@
     $result = $xml->xpath("//author");
     if(isset($result[0]) && $result[0] != null){
         $main_dvo->AUTHORNAME = $functions->sanitizeInput(trim($result[0]));
+    }
+
+    $result = $xml->xpath("//caption");
+    if(isset($result[0]) && $result[0] != null){
+        $main_dvo->CAPTION = $functions->sanitizeInput(trim($result[0]));
     }
     
     $result = isset($_POST["videoFileCount"])?$_POST["videoFileCount"]:0;
@@ -42,7 +57,7 @@
         $webPaths = [];
         $uploadStatus = []; // To store per-file success or error
         $maxFileSizeImage = $MAX_FILE_SIZE_IMAGE;
-        $maxFileSizeOtherMedia = $MAX_FILE_SIZE_IMAGE;
+        $maxFileSizeOtherMedia = $MAX_FILE_SIZE_OTHER_MEDIA;
         $imageCount = $otherMediaCount = 0;
         $errorMsg = "You can upload up to four files; 2 images and 2 audio, video or gif files. Please refer to guildlines.";
         $date = date_create("now",timezone_open("Asia/Kolkata"));

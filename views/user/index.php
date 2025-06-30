@@ -20,17 +20,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form</title>
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style.css">
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/css2.css">
+	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style.css?ver=<?=$VER?>">
+	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/css2.css?ver=<?=$VER?>">
 </head>
 <body>
     <div class="container-fluid pb-5">
         <div class="container py-5">
             <div class="text-center mb-3">
-                <h1 class="text-primary text-uppercase" style="letter-spacing: 5px;">Share your Memories</h1>
-                <p>
-                    subtitle
-                </p>
+                <h1 class="text-primary text-uppercase" style="letter-spacing: 5px;">ANGKOR, WHAT?</h1>
+                <h6>Us in creating an inconclusive anthology of the Angkor Photo Festival & Workshops</h6>
             </div>                      
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-8 review-form-cont">
@@ -38,42 +36,62 @@
                         <form name="uploadMediaForm" id="uploadMediaForm" onsubmit="return false">
                             <div class="form-row">
                                 <div class="control-group">
-                                    <Label for="authorName">Author Name</Label>
-                                    <input type="text" class="form-control p-4" name="authorName" id="authorName" placeholder="Your name" size="50" value="<?php echo $author; ?>"/>
+                                    <label for="authorName" class="">Author Name </label>
+                                    <div class="tooltip2">
+                                        <img src="<?php echo $webURL; ?>reckStatic/images/qmark.png" alt="info" class="qmark-icon">
+                                        <span class="tooltiptext">
+                                            Write name here
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control p-4" name="authorName" id="authorName" placeholder="Name..." value="<?php echo $author; ?>"/>
                                     <p class="help-block text-danger"></p>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="control-group">
-                                     <label for="imageInput">
-                                        <div>
-                                            <div>
-                                                <b>Media Upload Guidelines</b>
+                                    <label for="imageInput">Upload media</label>
+                                    <div class="tooltip2">
+                                        <img src="<?php echo $webURL; ?>reckStatic/images/qmark.png" alt="info" class="qmark-icon">
+                                        <span class="tooltiptext tooltipbigtext">
+                                            <div class="">
                                                 <div>
-                                                    <small>(Total Limit: Maximum of 4 media files)</small>
+                                                    <b>Media Upload Guidelines</b>
+                                                </div>
+                                                <div class="row fs-small">
+                                                    <div class="col-6">
+                                                        <div class="category"><b>Images:</b></div>
+                                                        <ul>
+                                                            <li>Maximum No. 2</li>
+                                                            <li>File size: 500KB or less</li>
+                                                            <li>Formats accepted: <b>'jpg', 'jpeg', 'png'</b></li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div><b>Audio, Video, or GIF:</b></div>
+                                                        <ul>
+                                                            <li>Maximum No. 2</li>
+                                                            <li>File size: 1MB or less</li>
+                                                            <li>Formats accepted: <b>'gif', 'mp3', 'mp4'</b></li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="row text-muted fs-small">
-                                                <div class="col-6">
-                                                    <div><b>Images:</b></div>
-                                                    <ul>
-                                                        <li>Up to 2 images allowed</li>
-                                                        <li>Each image must be 500KB or smaller</li>
-                                                        <li>Only these extensions are allowed - <b>'jpg', 'jpeg', 'png'</b></li>
-                                                    </ul>
-                                                </div>
-                                                <div class="col-6">
-                                                    <div><b>Audio, Video, or GIF:</b></div>
-                                                    <ul>
-                                                        <li> Up to 2 files allowed</li>
-                                                        <li>Each file must be 1MB or smaller</li>
-                                                        <li>Only these extensions are allowed - <b> 'gif', 'mp3', 'mp4'</b></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                        </div>
-                                     </label>
-                                    <input class="form-control" type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*" multiple>
+                                        </span>
+                                    </div>
+                                    <input class="form-control" type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="control-group">
+                                    <label for="caption" class="">Caption</label>
+                                    <div class="tooltip2">
+                                        <img src="<?php echo $webURL; ?>reckStatic/images/qmark.png" alt="info" class="qmark-icon">
+                                        <span class="tooltiptext">
+                                            Write caption here
+                                        </span>
+                                    </div>
+                                    <input type="text" class="form-control p-4" name="caption" id="caption" placeholder="Caption..."/>
                                 </div>
                             </div>
 
@@ -99,7 +117,7 @@
 
 
     <!-- custom JS -->
-     <script src="<?php echo $webURL;?>reckStatic/js/common.js"></script>
-     <script src="<?php echo $webURL;?>reckStatic/js/UI-development.js"></script>
+     <script src="<?php echo $webURL;?>reckStatic/js/common.js?ver=<?=$VER?>"></script>
+     <script src="<?php echo $webURL;?>reckStatic/js/UI-development.js?ver=<?=$VER?>"></script>
 </body>
 </html>
