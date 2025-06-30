@@ -10391,3 +10391,76 @@ h6,
     border: none !important;
     outline: none;
 }
+
+.qmark-icon{
+  width: 17px;
+  filter: invert(46%) sepia(26%) saturate(0%) hue-rotate(150deg) brightness(80%) contrast(96%);
+}
+
+.label-field{
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+/* tooltip */
+@media (max-width: 576px) {
+  .tooltip2 .tooltipbigtext {
+    width: 282px !important;
+  }
+  
+}
+@media (max-width: 400px) {
+  .tooltip2 .tooltipbigtext {
+    margin-left: -120px !important;
+  }
+}
+
+.tooltip2 {
+  position: relative;
+  display: inline-block;
+  border-bottom: 1px dotted black;
+} 
+
+.tooltip2 .tooltiptext {
+  visibility: hidden;
+  width: 120px;
+  background-color: #555;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 0;
+  position: absolute;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  margin-left: -60px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.tooltip2 .tooltipbigtext li{
+  text-align: left;
+  padding: 0;
+}
+
+.tooltip2 .tooltipbigtext{
+  width: 500px;
+}
+
+.tooltip2 .tooltiptext::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #555 transparent transparent transparent;
+}
+
+.tooltip2:hover .tooltiptext {
+  visibility: visible;
+  opacity: 1;
+}
+/* tooltip */
