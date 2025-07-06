@@ -56,5 +56,21 @@ class Functions{
         }
         return [$type, $details];
     }
+
+    //Used to show last slide after media slides
+    function isLastPage($totalRecords, $limit){
+        if($totalRecords <= $limit){
+            return true;
+        }
+        return false;
+    }
+
+    function isFileExits($filePath){
+        $filePath = __DIR__.'/uploads/'.basename($filePath);
+        if (file_exists($filePath)) {
+            return true;
+        }
+        return false;
+    }
 }
 ?>

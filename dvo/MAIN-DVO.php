@@ -15,5 +15,7 @@
        public $HEIGHT;
        public $WIDTH;
        public $CAPTION;
+       public $OFFSET;
+       public $PAGINATION;
     }
 ?>

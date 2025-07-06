@@ -8,7 +8,9 @@
     $COOKIEDOMAIN = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
     $VER = '0.1';
 
-    $CONST_FETCH_IMAGE_LIMIT = 10;
+    $CONST_FETCH_IMAGE_LIMIT = 11;//Fetching one extra media, to know end of records
+    $CONST_PAGINATION_STATUS = 1;
+    $CONST_FETCHFN_BEFORE_QUEUE_ENDS = 5;// **Used to call JS fetch function** Fetch media when these no. of files are remaining
 
     $CONST_ALLOWED_TYPES = ['jpg', 'jpeg', 'png', 'gif', 'mp3', 'mp4'];
     $CONST_TYPE_IMAGE = ['jpg', 'jpeg', 'png'];

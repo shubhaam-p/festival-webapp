@@ -1,7 +1,11 @@
-async function listGalleryMediaFiles(pckId = '', PackDetails = false){  
-    let getMedia = '';
+async function listGalleryMediaFiles(calledAgain = false, page = 0){  
+    let pagination = '';
+
+    if(calledAgain && page > 0)
+        pagination = `&page=${page}`;
+
     let res = await makeAjaxCall({
-        url: `${webURL}/new-cont-reg?Type=Gall3ry&action=listMedia&home=true`,
+        url: `${webURL}/new-cont-reg?Type=Gall3ry&action=listMedia&home=1${pagination}`,
         method: "GET",
         });
     return res; 

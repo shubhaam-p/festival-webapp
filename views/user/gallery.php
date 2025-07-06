@@ -32,14 +32,21 @@
 		const mediaList = document.getElementById("media-list");
 		mediaList.innerHTML = "";
 		let result = cls = '';
-		let current = 0;
 		let startY = 0;
 		let isScrolling = false;
 		let isPinching = false;
 		let pauseScrollTimeInSec = 2000;//Pause the scrolling after media scrolled
+		let fetchMediaFnCalled = 0;//Wait till media is listed in dom, before next call -- Additional flag
+		const callFechFnBeforeNoOfFiles = <?=$CONST_FETCHFN_BEFORE_QUEUE_ENDS?>
+	
 		const AppState = {
 			slides: {},
-			wavesurfer: new Map()
+			wavesurfer: new Map(),
+			pageNo: 0,//For pagination
+			isLastPage: 0,//Flag is used for letting user that he scrolled upto end 
+			endOfSlideShown: 0,//Flag if end slide shown after last media
+			current: 0,
+			isFirstSlideAdded: 0,//Flag used to add active class
 		};
 
 		let obj = {
@@ -48,8 +55,13 @@
 			letMeKnow() {
 				console.log('total ',obj.totalMediaCount);
 				if(!isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
+					
+					AppState.slides = {};
+					AppState.wavesurfer = new Map();
 					AppState.slides = document.querySelectorAll('.media-slide');
 					addLoader();
+					//Reseting the flag
+					fetchMediaFnCalled = 0;
 				}
 			},
 			get imageDone() {
@@ -68,20 +80,25 @@
 			}
 		}
 
-		function showNextSlide(){
-			if (current < AppState.slides.length - 1) {
-				console.log("inside",AppState.slides[current], AppState.slides[current+1])
+		//Initial call - Fetch media
+		await callListGalleryMediaFiles();
+
+		async function showNextSlide(){
+			if (AppState.current < AppState.slides.length - 1) {
+				if(AppState.isLastPage === false && (AppState.slides.length - 1 - AppState.current) == callFechFnBeforeNoOfFiles && fetchMediaFnCalled == 0){
+					fetchMediaFnCalled = 1;
+					obj.totalMediaCount = NaN;
+					//Pagination call - Fetch media
+					await callListGalleryMediaFiles(1, AppState.pageNo);
+				}
 				
-		    	const datatype = $(AppState.slides[current]).find('.audio-wrapper').attr('data-type') ?? '';
-				console.log('datatype ',datatype, AppState.wavesurfer)
+		    	const datatype = $(AppState.slides[AppState.current]).find('.audio-wrapper').attr('data-type') ?? '';
 				switch (datatype) {
 					case 'audio':
-						let id = $(AppState.slides[current]).find('.audio-wrapper').attr('data-id') ?? 0;
+						let id = $(AppState.slides[AppState.current]).find('.audio-wrapper').attr('data-id') ?? 0;
 						id = id!==0? parseInt(id):0;
 						const instance = AppState.wavesurfer.get(id);
-						console.log('audio type file swiped -- destroy ',id)
 						if (instance && id) {
-							console.log("destroy WS instance")
 							instance.destroy();
 							AppState.wavesurfer.delete(id);
 							console.log(`Destroyed WaveSurfer: ${id}`, AppState.wavesurfer);
@@ -94,10 +111,13 @@
 				}
 
 				//Added this after switch block because, switch was deleting next instance rather than current
-				AppState.slides[current].classList.remove('active');
-				current++;
-				AppState.slides[current].classList.add('active');
-				AppState.slides[current].scrollIntoView({ behavior: "smooth", block: "start" });
+				AppState.slides[AppState.current].classList.remove('active');
+				AppState.current++;
+				AppState.slides[AppState.current].classList.add('active');
+				AppState.slides[AppState.current].scrollIntoView({ behavior: "smooth", block: "start" });
+			} else if(AppState.isLastPage === true && AppState.endOfSlideShown === 0){
+				AppState.endOfSlideShown = 1
+				console.log("You've seen all of posts!");
 			} else {
 				// End of media
 				console.log("You've reached the end of the exhibition!");
@@ -164,21 +184,24 @@
 		});
 
 		//Fetch images
-		await listGalleryMediaFiles().then((result)=>{
-			if(result?.total == 0){
-				let div = document.createElement("div");
-				div.innerHTML = '<div>Packages are currenly unavailable!</div>';
-				mediaList.append(div);
-			}else{
-				let mediaFile = result.data;
-				obj.totalMediaCount = result.total;				
-				i = j = 0;
+		async function callListGalleryMediaFiles(calledAgain = 0, pageNo = 0){
+			await listGalleryMediaFiles(calledAgain, (pageNo+1)).then(async (result)=>{
+				if(result?.total == 0){
+					let div = document.createElement("div");
+					div.innerHTML = '<div>Packages are currenly unavailable!</div>';
+					mediaList.append(div);
+				}else{
+					let mediaFile = result.data;
+					obj.totalMediaCount = result.total;
+					AppState.pageNo = parseInt(result.page);		
+					AppState.isLastPage = result.lastPage;
 
-				for(let i = 0; i < result.total; i++){
+					mediaFile.forEach((element, i, array) => {
+						
 					let isAudio = 0;	
 					let div = document.createElement("div");
 					div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
-					if(i==0)
+					if(AppState.isFirstSlideAdded === 1 && calledAgain == 0)
 						div.classList.add("active");
 
 					let cls = mediaFile[i].CLASS !='' || mediaFile[i].CLASS != 'undefined'? mediaFile[i].CLASS:'';
@@ -207,21 +230,28 @@
 									</div>`;
 
 							break;
+						
+						case 'last':
+							file = "<p>You've seen all of posts!</p>";
+
 						default:
 							console.log('unspported format');
 					}
+	
+						// Append images to row
+						div.innerHTML = file;
+						mediaList.appendChild(div);
+						
+						if(isAudio == 1){
+							createWavesOfAudio(mediaFile[i].MEDIA, mediaFile[i].ID);
+						}
 
-					// Append images to row
-					div.innerHTML = file;
-					mediaList.appendChild(div);
-
-					if(isAudio == 1){
-						createWavesOfAudio(mediaFile[i].MEDIA, mediaFile[i].ID);
-					}
-					obj.totalMediaCount--;
+						AppState.isFirstSlideAdded++;
+						obj.totalMediaCount--;
+					});
 				}
-			}
-		});
+			});
+		}
 
 		function createWavesOfAudio(audioURL, ID = 0){
 			ID = parseInt(ID);
@@ -258,7 +288,7 @@
 			});
 		}
 
-		$('.playPause').click(function(){
+		$(document).on("click",".playPause",function() {
 			elementId = this.id;
 			actualId = parseInt(this.getAttribute('data-id'));
 
@@ -273,31 +303,36 @@
 			instance.playPause()
 		})
 
+		//Remove loader class from elements before next round of elements come in because it is adding loader class two times because of that i think 
 		//Add skeleton loader instaed of rounf
 		function addLoader(){
-			AppState.slides.forEach(item => {
-			const loader = document.createElement('div');
+			AppState.slides.forEach((item, index, array) => {
+			//Do not add loader to last 'All done' page
+			if(AppState.isLastPage === true && (index === array.length - 1)){
+				console.log("last 11th record")
+				return;
+			}
+
+			const loader = document.createElement( 'div');
 			loader.className = 'loader';
 			item.appendChild(loader);
 
-			const media = item.querySelector('img, video, audio');
-
-			if (media.tagName === 'IMG') {
+			const media = item.querySelector('img, video, audio, p');
+			if (media?.tagName === 'IMG') {
 				media.onload = () => {
 				item.classList.add('loaded');
 				loader.remove();
 				};
-			} else if (media.tagName === 'VIDEO' || media.tagName === 'AUDIO') {
+			} else if (media?.tagName === 'VIDEO' || media?.tagName === 'AUDIO') {
 				media.onloadeddata = () => {
 				item.classList.add('loaded');
 				loader.remove();
 				};
 			}
 
-			// Lazy load src if using data-src
-			if (media.dataset.src) {
-				media.src = media.dataset.src;
-				media.removeAttribute('data-src');
+			if(item.querySelector('loaded')){
+				loader.remove();
+				console.log("remove loader ",item)
 			}
 			});
 

@@ -100,11 +100,13 @@ Class MAIN_DAO extends AbstractDAO{
     public function getImages($main_dvo) {
         $returnVal = [];
         try {
-            $limit = "";
+            $limit = $offset = "";
             if(isset($main_dvo->LIMIT))
                 $limit = "LIMIT $main_dvo->LIMIT";
-            $query = "SELECT id, url, height, width, mimetype, type FROM media WHERE status = 1 ORDER BY id DESC $limit";
 
+            if(isset($main_dvo->PAGINATION) && !empty($main_dvo->OFFSET))
+                $offset = "OFFSET $main_dvo->OFFSET";
+            $query = "SELECT id, url, height, width, mimetype, type FROM media WHERE status = 1 ORDER BY id ASC $limit $offset";
             $stmt = $this->myslqi->prepare($query);
             $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = $TYPE = array(); 
             $CLASS = '';
