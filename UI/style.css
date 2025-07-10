@@ -1922,7 +1922,7 @@ pre code {
   background-color: #fff;
   border-color: #b8e087;
   outline: 0;
-  box-shadow: 0 0 0 0.2rem rgba(122, 183, 48, 0.25);
+  box-shadow: 0 0 0 0.2rem rgb(255 146 149 / 25%);
 }
 
 .form-control::placeholder {
@@ -10500,10 +10500,6 @@ h6,
 }
 
 @media (max-width: 400px) {
-  .titleForm{
-    letter-spacing: 0px;
-  }
-
   .review-form-cont {
     padding: 1rem !important;
   }
