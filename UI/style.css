@@ -10319,10 +10319,10 @@ h6,
 
 .review-user-form .form-row{
     padding: 1rem 0;
-    background-color: #fff;
     margin-bottom: 12px;
     border-radius: 8px;
 }
+
 .review-user-form input[type=text], .review-user-form input[type=email], .review-user-form textarea,
 .review-user-form input[type=text]:active, .review-user-form input[type=email]:active, .review-user-form  textarea:focus{
     border: none !important;
