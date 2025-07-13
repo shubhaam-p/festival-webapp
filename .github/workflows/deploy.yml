@@ -24,5 +24,3 @@ jobs:
           source: "."
           target: "/domains/mistressyaf.com/public_html/"
           rm: false
-
-          server-dir: /domains/mistressyaf.com/public_html/
