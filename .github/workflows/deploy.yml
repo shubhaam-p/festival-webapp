@@ -1,4 +1,4 @@
-name: FTP Deploy to Hiox
+name: SFTP Deploy to Hiox
 
 on:
   push:
@@ -6,17 +6,23 @@ on:
       - main
 
 jobs:
-  ftp-deploy:
-    name: Deploy via FTP
+  deploy:
+    name: Upload via SFTP
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: FTP Deploy
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      - name: SFTP Deploy
+        uses: appleboy/scp-action@v0.1.7
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          host: ${{ secrets.SFTP_HOST }}
+          username: ${{ secrets.SFTP_USERNAME }}
+          password: ${{ secrets.SFTP_PASSWORD }}
+          port: ${{ secrets.SFTP_PORT }}
+          source: "."
+          target: "/domains/mistressyaf.com/public_html/"
+          rm: false
+
           server-dir: /domains/mistressyaf.com/public_html/
