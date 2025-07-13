@@ -13,7 +13,7 @@
 </head>
 <body>
 
-	<div class="container">
+	<div class="page-container">
 		<div class="row g-4">
             <div id="media-list"></div>
 		</div>
@@ -35,7 +35,7 @@
 		let startY = 0;
 		let isScrolling = false;
 		let isPinching = false;
-		let pauseScrollTimeInSec = 2000;//Pause the scrolling after media scrolled
+		let pauseScrollTimeInSec = 400;//Pause the scrolling after media scrolled
 		let fetchMediaFnCalled = 0;//Wait till media is listed in dom, before next call -- Additional flag
 		const callFechFnBeforeNoOfFiles = <?=$CONST_FETCHFN_BEFORE_QUEUE_ENDS?>
 	
@@ -59,7 +59,7 @@
 					AppState.slides = {};
 					AppState.wavesurfer = new Map();
 					AppState.slides = document.querySelectorAll('.media-slide');
-					addLoader();
+					addLoader(AppState.pageNo);
 					//Reseting the flag
 					fetchMediaFnCalled = 0;
 				}
@@ -164,25 +164,6 @@
 			}, { passive: true }
 		);
 
-		//Zoom
-		const images = document.querySelectorAll('.zoomable');
-		images.forEach(img => {
-			img.addEventListener('dblclick', (e) => {
-				const isZoomed = img.classList.contains('img-zoom');
-				// Remove zoom from all images
-				images.forEach(i => i.classList.remove('img-zoom'));
-
-				if(!isZoomed){
-					const rect = img.getBoundingClientRect();
-					const offsetX = e.clientX - rect.left;
-					const offsetY = e.clientY - rect.top;
-		
-					img.style.transformOrigin = `${offsetX}px ${offsetY}px`;
-					img.classList.toggle('img-zoom');
-				}
-			});
-		});
-
 		//Fetch images
 		async function callListGalleryMediaFiles(calledAgain = 0, pageNo = 0){
 			await listGalleryMediaFiles(calledAgain, (pageNo+1)).then(async (result)=>{
@@ -200,8 +181,8 @@
 						
 					let isAudio = 0;	
 					let div = document.createElement("div");
-					div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6", "media-container");
-					if(AppState.isFirstSlideAdded === 1 && calledAgain == 0)
+					div.classList.add("media-slide", "col-sm-12", "col-md-6", "col-lg-6");
+					if(AppState.isFirstSlideAdded === 0 && calledAgain == 0)
 						div.classList.add("active");
 
 					let cls = mediaFile[i].CLASS !='' || mediaFile[i].CLASS != 'undefined'? mediaFile[i].CLASS:'';
@@ -209,22 +190,21 @@
 					let file = ''; 
 					switch(mimeType[0]){
 						case 'image':
-							file = `<img src="${mediaFile[i].MEDIA}" class="${cls}" data-type="image" loading="lazy">`;
+							file = `<img src="${mediaFile[i].MEDIA}" class="${cls}" data-type="image" loading="lazy">
+									<div class="media-caption">${mediaFile[i].CAPTION}</div>`;
 							break;
 
 						case 'video':
-							file = `<video src="${mediaFile[i].MEDIA}" class="${cls}" data-type="video" controls></video>`;
+							file = `<video src="${mediaFile[i].MEDIA}" class="${cls}" data-type="video" controls></video>
+									<div class="media-caption">${mediaFile[i].CAPTION}</div>`;
 							break;
 
 						case 'audio':
 							isAudio = 1;
-							// let screenwidth = window.innerWidth;
 							file = `
 									<div class="audio-wrapper" data-id="${mediaFile[i].ID}" data-type="audio">
-										<button id="playPause-${mediaFile[i].ID}" class="playPause" data-id="${mediaFile[i].ID}">
-											<img src="${webURL}reckStatic/images/play.png" alt="play">
-										</button>
-										<div class="audio-container" style="width:400px">
+										<div class="audio-title">${mediaFile[i].CAPTION}</div>
+										<div class="audio-container">
 											<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
 										</div>
 									</div>`;
@@ -233,11 +213,15 @@
 						
 						case 'last':
 							file = "<p>You've seen all of posts!</p>";
+							break;
 
 						default:
 							console.log('unspported format');
+							return;
+							break;
+
 					}
-	
+						div.setAttribute('data-page',result.page)
 						// Append images to row
 						div.innerHTML = file;
 						mediaList.appendChild(div);
@@ -263,10 +247,11 @@
 				cursorWidth: 2,
 				height:200,
 				interact: true,
-				barWidth: 3,
+				barWidth: 4,
 				barGap: 1,
 				barRadius: 2,
-				url: "URL",    
+				url: "URL",
+				mediaControls: true,
 			}
 
 			options.url= audioURL
@@ -275,8 +260,8 @@
 			AppState.wavesurfer.set(ID, wsInstance);
 
 			loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
-			$('.waveform').css('display','none')
-			$(loadingText).insertAfter('.waveform')
+			$('#waveform-'+ID+'').css('display','none')
+			$(loadingText).insertAfter('#waveform-'+ID+'')
 			
 			wsInstance.on('ready',()=>{
 				$('#waveform-'+ID+' + p').remove()
@@ -288,42 +273,33 @@
 			});
 		}
 
-		$(document).on("click",".playPause",function() {
-			elementId = this.id;
-			actualId = parseInt(this.getAttribute('data-id'));
-
-        	const instance = AppState.wavesurfer.get(actualId);
-
-			if(instance){
-				if(!instance.isPlaying())
-					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/pause.png`
-				else 
-					$('#playPause-'+actualId).children()[0].src = `${webURL}reckStatic/images/play.png`
-			}
-			instance.playPause()
-		})
-
-		//Remove loader class from elements before next round of elements come in because it is adding loader class two times because of that i think 
 		//Add skeleton loader instaed of rounf
-		function addLoader(){
+		function addLoader(pageNo){
+			console.log("pageno ",pageNo);
 			AppState.slides.forEach((item, index, array) => {
-			//Do not add loader to last 'All done' page
-			if(AppState.isLastPage === true && (index === array.length - 1)){
-				console.log("last 11th record")
+				//Do not add loader to last 'All done' page
+				if(AppState.isLastPage === true && (index === array.length - 1)){
+					console.log("last 11th record")
+					return;
+				}
+				console.log( item.getAttribute('data-page'))
+
+			let elementPageNo = parseInt(item.getAttribute('data-page'));
+			if(elementPageNo != pageNo){
 				return;
 			}
 
 			const loader = document.createElement( 'div');
 			loader.className = 'loader';
-			item.appendChild(loader);
-
-			const media = item.querySelector('img, video, audio, p');
+			const media = item.querySelector('img, video, p');
 			if (media?.tagName === 'IMG') {
+				item.appendChild(loader);
 				media.onload = () => {
 				item.classList.add('loaded');
 				loader.remove();
 				};
-			} else if (media?.tagName === 'VIDEO' || media?.tagName === 'AUDIO') {
+			} else if (media?.tagName === 'VIDEO') {
+				item.appendChild(loader);
 				media.onloadeddata = () => {
 				item.classList.add('loaded');
 				loader.remove();

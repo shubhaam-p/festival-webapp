@@ -39,7 +39,7 @@
         $main_dvo->LIMIT = $CONST_FETCH_IMAGE_LIMIT;
         
         //Returns media array and last id of media
-        $data = $main_dao->getImages($main_dvo, $functions);
+        $data = $main_dao->getMedia($main_dvo, $functions);
     }
 
     if(count($data) > 0){

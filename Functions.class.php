@@ -1,13 +1,13 @@
 <?php
 
 class Functions{  
-    function sanitizeInput($str) {
+    function sanitizeInput($str):string|bool {
         if (!$str)
             return false;
         return htmlentities(trim(strip_tags($str)), ENT_NOQUOTES, 'UTF-8');
     }
 
-    function validateFileNTypes($main_dvo, $CONST_MIME_TYPE_IMAGE, $CONST_MIME_TYPE_OTHER_MEDIA){
+    function validateFileNTypes($main_dvo, $CONST_MIME_TYPE_IMAGE, $CONST_MIME_TYPE_OTHER_MEDIA):array{
         $imageCount = $otherMediaCount = 0;
         $mimeArr = $notAllowedMedia = [];
 
@@ -29,13 +29,13 @@ class Functions{
         return [$imageCount, $otherMediaCount, $mimeArr, $notAllowedMedia];
     }
 
-    function getUserIP() {
+    function getUserIP():string {
         return $_SERVER['HTTP_CLIENT_IP']
             ?? $_SERVER['HTTP_X_FORWARDED_FOR']
             ?? $_SERVER['REMOTE_ADDR'];
     }
 
-    function getMediaDimensions($filePath, $mimeType, $videoDetails = []){
+    function getMediaDimensions($filePath, $mimeType, $videoDetails = []):array{
         $details = [];
         $type = 0;
         switch (explode('/', $mimeType)[0]) {
@@ -58,14 +58,14 @@ class Functions{
     }
 
     //Used to show last slide after media slides
-    function isLastPage($totalRecords, $limit){
+    function isLastPage($totalRecords, $limit):bool{
         if($totalRecords <= $limit){
             return true;
         }
         return false;
     }
 
-    function isFileExits($filePath){
+    function isFileExits($filePath):bool{
         $filePath = __DIR__.'/uploads/'.basename($filePath);
         if (file_exists($filePath)) {
             return true;

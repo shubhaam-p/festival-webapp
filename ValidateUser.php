@@ -1,5 +1,13 @@
 <?php
     try {
+        $IPExists = 0;
+        $dataOfUploadedFiles = [];
+
+        if($adminAccess){
+            error_log("Admin");
+            $main_dvo->USERID = $CONST_ADMIN_UID;
+            return;
+        }
         //Check if cookie is set of form submitted
         if (isset($_COOKIE['form_submitted'])) {
             error_log("cookie form_subitted is set".print_r($_COOKIE,1));
@@ -7,8 +15,6 @@
         }
 
         //Check IP exists in DB
-        $IPExists = 0;
-        $dataOfUploadedFiles = [];
         $main_dvo->IPADDR = $functions->getUserIP();
         $IPExists = $main_dao->checkIfIPExists($main_dvo);
 

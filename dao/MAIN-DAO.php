@@ -4,7 +4,7 @@ require $_SERVER['DOCUMENT_ROOT'] . "/dao/ABSTRACT-DAO.php";
 
 Class MAIN_DAO extends AbstractDAO{
 
-    function employerLoginAuth($main_dvo){
+    function employerLoginAuth($main_dvo):int{
         $returnVal = 0;
         $aid = $DTPASSWORD = $password = $userId = "";
         try {
@@ -50,7 +50,7 @@ Class MAIN_DAO extends AbstractDAO{
 
     }
 
-    function storeMedia($main_dvo){
+    function storeMedia($main_dvo):int{
         $returnVal = $default = 0;
         try {
             $query="INSERT INTO media (authid, url, caption, type, height, width, mimetype, filesize) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
@@ -73,7 +73,7 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
 
-    function addAuthor($main_dvo){
+    function addAuthor($main_dvo):int{
         $returnVal = 0;
         try {
             $query="INSERT INTO author (name, ipaddress) VALUES(?,?)";
@@ -97,7 +97,7 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
 
-    public function getImages($main_dvo) {
+    public function getMedia($main_dvo):array {
         $returnVal = [];
         try {
             $limit = $offset = "";
@@ -106,15 +106,15 @@ Class MAIN_DAO extends AbstractDAO{
 
             if(isset($main_dvo->PAGINATION) && !empty($main_dvo->OFFSET))
                 $offset = "OFFSET $main_dvo->OFFSET";
-            $query = "SELECT id, url, height, width, mimetype, type FROM media WHERE status = 1 ORDER BY id ASC $limit $offset";
+            $query = "SELECT id, url, height, width, mimetype, type, caption FROM media WHERE status = 1 ORDER BY id DESC $limit $offset";
             $stmt = $this->myslqi->prepare($query);
-            $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = $TYPE = array(); 
+            $MEDIAURL = $NID = $HEIGHT = $WIDTH = $MIMETYPE = $TYPE = $CAPTION = array(); 
             $CLASS = '';
             if ($stmt->execute()) {
-                $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE, $TYPE);
+                $stmt->bind_result($NID, $MEDIAURL, $HEIGHT, $WIDTH, $MIMETYPE, $TYPE, $CAPTION);
                 while ($stmt->fetch()) {
                     $CLASS = $WIDTH > $HEIGHT ? 'landscape':'portrait';
-                    array_push($returnVal, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE));
+                    array_push($returnVal, array('ID'=>$NID, 'MEDIA'=>$MEDIAURL, 'HEIGHT'=>$HEIGHT, 'WIDTH'=>$WIDTH, 'MIMETYPE'=>$MIMETYPE, 'CLASS'=>$CLASS, 'TYPE'=>$TYPE, 'CAPTION'=>$CAPTION));
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
@@ -127,7 +127,7 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
    
-    public function checkIfIPExists($main_dvo) {
+    public function checkIfIPExists($main_dvo):int {
         $returnVal = $count = 0;
         try {
             $query = "SELECT count(id) FROM author WHERE ipaddress = ? limit 1";
@@ -150,7 +150,7 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
    
-    public function getCountOfUploadedFiles($main_dvo) {
+    public function getCountOfUploadedFiles($main_dvo):array {
         $returnVal = [];
         $count = $type = $totalCount = 0;
         try {

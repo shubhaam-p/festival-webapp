@@ -39,4 +39,5 @@
 
     $MAX_POST_SIZE = 4000 * 1024; // 4 MB limit ***not in use**
 
+    $CONST_ADMIN_UID = 1; //Admin ID for unlimited uploads
 ?>  

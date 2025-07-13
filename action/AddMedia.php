@@ -5,7 +5,7 @@
     if (isset($_FILES["file"]) && is_countable($_FILES["file"]) && count($_FILES)>1) {
           $returnArray = [
             'status'=> 2,
-            'message'=> 'Please upload one file at a time'
+            'message'=> 'Please upload one file at a time.'
         ];
         echo json_encode($returnArray);
         exit();
@@ -20,12 +20,14 @@
     $main_dao = new MAIN_DAO();
     $functions = new Functions();
 
-    require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
-
-    $save = $error = $msg = $videoFileCount = '';
+    $save = $error = $msg = $videoFileCount = $adminAccess = '';
     $queryXML = str_replace("\'", "'", $_REQUEST["xmlData"]);
     $xml = simplexml_load_string(htmlspecialchars_decode($queryXML));
     
+    $result = $xml->xpath("//admin");
+    if(isset($result[0]) && $result[0] != null){
+        $adminAccess = $functions->sanitizeInput(trim($result[0]));
+    }
     $result = $xml->xpath("//author");
     if(isset($result[0]) && $result[0] != null){
         $main_dvo->AUTHORNAME = $functions->sanitizeInput(trim($result[0]));
@@ -40,6 +42,8 @@
     if(!empty($result[0]) && $result[0] !== ''){
         $videoFileCount = $functions->sanitizeInput(trim($result[0]));
     }
+
+    require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
 
     $videoDimArr = [];
     $videoFileCount = isset($videoFileCount) && ($videoFileCount > 0) ? $videoFileCount : 0;
@@ -215,7 +219,7 @@
                     }
                     setcookie('media_count', ((int)$_COOKIE['media_count']+(int)count($uploadedImg)), time() + ($COOKIE_EXPIRY_TIME), "/");
                     
-                }else if($_SESSION['userId']){
+                }else if(isset($_SESSION['userId'])){
                     $cookie_name = 'media_count';
                     $cookie_value = count($uploadedImg);
                     if(isset($dataOfUploadedFiles[3]))

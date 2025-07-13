@@ -52,15 +52,19 @@ $('form[id="uploadMediaForm"]').validate({
     },
     submitHandler: async function(form) {
         try{
-        if (isCookieSet('form_submitted') || (isCookieSet('media_count') && getCookie('media_count')>=4)){
-            throw 'Form is already submitted. Thank you!';
-        }
+        let isAdmin = parseInt($('#adminAccess').val()); 
+        if( isAdmin === 0)
+            if (isCookieSet('form_submitted') || (isCookieSet('media_count') && getCookie('media_count')>=4)){
+                throw 'Form is already submitted. Thank you!';
+            }
+        
         onclickLoading('submitFormButton');
         $('.submit-response-msg').empty()
         $('.submit-response-msg').show();
         // Constants for XML parameters
         const XML_PARAMETER_AUTHORNAME = "author";
         const XML_PARAMETER_CAPTION = "caption";
+        const XML_PARAMETER_ADMIN = "admin";
         const actionURL = 'addMedia';
 
         let msg = ``;
@@ -75,6 +79,7 @@ $('form[id="uploadMediaForm"]').validate({
             + `<action>${actionURL}</action>`
             + getXMLString(XML_PARAMETER_AUTHORNAME, () => authorName)
             + getXMLString(XML_PARAMETER_CAPTION, () => caption)
+            + getXMLString(XML_PARAMETER_ADMIN, () => isAdmin)
             + `</query>`;
 
         let formData = new FormData();
