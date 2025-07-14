@@ -4,7 +4,7 @@
 
 <style>
 		.text-center{height: 95vh; display: flex; justify-content: center; align-items: center; flex-wrap: wrap; flex-direction: column; font-family: 'Poppins'; }
-		.notFoundError { font-size: 100px; color: #39b54a; font-weight: bold; display: block;line-height: 1 }
+		.notFoundError { font-size: 100px; color: #d82818; font-weight: bold; display: block;line-height: 1 }
 		.notFoundSubtitle { font-size: 30px; font-weight: bold }
 	</style>
 </head>

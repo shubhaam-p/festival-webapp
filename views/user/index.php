@@ -10,13 +10,13 @@
     $main_dao = new MAIN_DAO();
 
     $adminAccess = 0;
+    $author = "";
     if( !empty($_REQUEST['admin'] ) && $_REQUEST['admin']>0 ){
         $admin = (int) trim($_REQUEST['admin']);
         $adminAccess = 1;
     }
 
     require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
-    $author = "";
     if(isset($_SESSION['author']))
         $author = $_SESSION['author'];
 ?>
@@ -26,8 +26,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form</title>
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style.css?ver=<?=$VER?>">
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/css2.css?ver=<?=$VER?>">
+	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style2.css?ver=<?=$VER?>">
 </head>
 <body>
     <div class="my-3"> 
