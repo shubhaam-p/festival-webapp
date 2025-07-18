@@ -26,11 +26,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form</title>
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style2.css?ver=<?=$VER?>">
+	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/css/style.css?ver=<?=$VER?>">
 </head>
 <body>
     <div class="my-3"> 
-        <div class="review-form-cont">
+        <div class="review-form-cont" id="form-content">
             <div class="form-row mb-3">
                 <h1 class="text-primary text-uppercase titleForm"> ANGKOR, WHAT?!</h1>
                 <h6 class="textGreyColor line subtitleForm">Join us in creating an inconclusive anthology of the <span class="font-weight-semi-bold">Angkor Photo Festival & Workshops </span></h6>
@@ -85,7 +85,8 @@
                                     </div>
                                 </span>
                             </div>
-                            <input class="form-control" type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*">
+                            <label id="imageInput-error" class="error" for="imageInput"></label>
+                            <input class="form-control" type="file" name="mediaFile" id="imageInput" accept="image/*,video/*,audio/*">
                         </div>
                     </div>
                     <div class="form-row">
@@ -108,7 +109,7 @@
 
                     <input type="hidden" name="adminAccess" id="adminAccess" value="<?=$adminAccess?>">
                 </form>
-                <div class="submit-response-msg text-center"></div>
+                <div class="submit-response-msg text-left"></div>
             </div>
         </div>
     </div>
@@ -118,7 +119,14 @@
         const fileInput = document.getElementById('imageInput');
         const fileLabel = document.getElementById('fileLabel');
         const fileCountText = document.getElementById('fileCountText');
+        const formContent = document.getElementById('form-content');
+        const thankYouScreen = <?php echo $thankYouScreen?>;
     
+        if(thankYouScreen == 1){
+            formContent.innerHTML='<div class="form-row mb-3 border-thankyou"><h1>You\'ve already responded.</h1></div>';
+            // return;
+        }
+
         fileInput.addEventListener('change', () => {
         const count = fileInput.files.length;
     

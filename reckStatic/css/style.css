@@ -44,7 +44,7 @@ body {
     width: 640px;
     border: 1px solid rgb(218, 220, 224);
     border-radius: 8px;
-    padding: 3rem;
+    padding: 2rem;
     background-color: #fbf9fd;
 }
 
@@ -185,12 +185,14 @@ input, button, select, optgroup, textarea {
 @media (max-width: 400px) {
   .tooltip2 .tooltipbigtext {
     width: 282px !important;
+    margin-left: -144px;
   }
 }
 
 .tooltip2 {
   position: relative;
   display: inline-block;
+  margin-left: 0.7rem;
 } 
 
 .tooltip2 .tooltiptext {
@@ -277,12 +279,6 @@ span.line {
     display: inline-block;
 }
 
-.tooltip2 .tooltipbigtext {
-    width: 500px;
-    text-align: -webkit-center;
-    margin-left: -249px;
-}
-
 .fs-small {
     font-size: 80%;
 }
@@ -311,13 +307,9 @@ ol, ul, dl {
     margin-bottom: 1rem;
 }
 
-#imageInput {
-    display: none;
-}
-
-#imageInput, #imageInput:active {
-    border: none !important;
-    outline: none;
+ #imageInput {
+    visibility: hidden;
+    max-height: 0;
 }
 
 /* file upload */
@@ -404,3 +396,22 @@ button, [type="button"], [type="reset"], [type="submit"] {
 100% { transform: rotate(360deg); }
 }
 /* splash Loader */
+
+label.error{
+    color:red;
+    display: block;
+}
+
+label {
+  margin-bottom: 0.5rem;
+}
+
+.submit-response-msg {
+    margin-top: 1rem;
+}
+
+/* thank you screen  */
+#form-content:has(.border-thankyou){
+    border-top: 10px solid #d82818;
+}
+/* thank you screen  */

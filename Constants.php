@@ -6,7 +6,7 @@
     $CONST_REPLACE_STR = 'CAAS';
     define('CONST_REPLACE_STR', $CONST_REPLACE_STR);
     $COOKIEDOMAIN = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
-    $VER = '0.1';
+    $VER = '0.3';
 
     $CONST_FETCH_IMAGE_LIMIT = 11;//Fetching one extra media, to know end of records
     $CONST_PAGINATION_STATUS = 1;

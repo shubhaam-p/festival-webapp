@@ -14,9 +14,7 @@
 <body>
 
 	<div class="page-container">
-		<div class="row g-4">
-            <div id="media-list"></div>
-		</div>
+        <div id="media-list"></div>
 	</div>
     <script>
         const webURL = "<?php echo $webURL;?>";
@@ -268,9 +266,6 @@
 				$('#waveform-'+ID).css('display','block')
 			})
 	
-			wsInstance.on('finish', () => {
-				$('#playPause-'+ID).children()[0].src = `${webURL}reckStatic/images/play.png`
-			});
 		}
 
 		//Add skeleton loader instaed of rounf

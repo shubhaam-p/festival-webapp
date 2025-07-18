@@ -42,13 +42,11 @@ function getCookie(name) {
 }
 
 $('form[id="uploadMediaForm"]').validate({  
-    rules: {  
-        authorName: 'required',
-        file: 'required'
+    rules: {
+        mediaFile: 'required'
     },
-    messages: {  
-        authorName: 'This field is required',
-        file: 'This field is required',
+    messages: {
+        mediaFile: 'This field is required',
     },
     submitHandler: async function(form) {
         try{
@@ -104,7 +102,7 @@ $('form[id="uploadMediaForm"]').validate({
         formData.append("action", actionURL);
         if(videoFileCount > 0)
             formData.append("videoFileCount", videoFileCount);
-
+        console.log("request in process!");
         await makeAjaxCall({
             url: `${webURL}/new-cont-reg`,
             method: "POST",
@@ -115,11 +113,13 @@ $('form[id="uploadMediaForm"]').validate({
                 // $("#uploadMediaForm")[0].reset();
                 $("#imageInput").val(null)
                 $("#caption").val(null)
+                $('#fileCountText').text(null);
+
                 console.log("reset form")
                 if(res.data.length>0){
                     res.data.forEach((i)=>{
                         if(i.status == 1)
-                            msg +=`<div>${i.message} ${i.data}</div>`;
+                            msg +=`<div>${i.message} : ${i.data}</div>`;
                         else
                             msg +=`<div class='fs-16 text-red'>${i.message}</div>`;
                     })
@@ -129,13 +129,13 @@ $('form[id="uploadMediaForm"]').validate({
                 
             } else{
                 msg = `<div>${res.message}</div>`;
-                $('.submit-response-msg').empty().show().html(`<b class='fs-16 text-red'>Error while submitting the form!!<b> <div>${msg}</div>`).delay(delayInSec).fadeOut(300);
+                $('.submit-response-msg').empty().show().html(`<div class='fs-16'>${msg}</div>`).delay(delayInSec).fadeOut(300);
             } 
             onclickError('submitFormButton');
         })
         }catch(err){
                 msg = `<div>${err}</div>`;
-                $('.submit-response-msg').empty().show().html(`${msg}`).delay(delayInSec).fadeOut(300);
+                $('.submit-response-msg').empty().show().html(`<div class='fs-16'>${msg}</div>`).delay(delayInSec).fadeOut(300);
         }
     }  
 });

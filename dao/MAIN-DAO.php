@@ -127,17 +127,19 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
    
-    public function checkIfIPExists($main_dvo):int {
-        $returnVal = $count = 0;
+    public function checkIfIPExistsNGetUser($main_dvo):array {
+        $returnVal = []; 
+        $count = $id = 0;
         try {
-            $query = "SELECT count(id) FROM author WHERE ipaddress = ? limit 1";
+            $query = "SELECT count(id), id FROM author WHERE ipaddress = ? limit 1";
             $stmt = $this->myslqi->prepare($query);
             $stmt->bind_param('s', $main_dvo->IPADDR);
 
             if ($stmt->execute()) {
-                $stmt->bind_result($count);
+                $stmt->bind_result($count, $id);
                 if ($stmt->fetch()) {
-                    $returnVal = $count;
+                    $returnVal[0] = $count;
+                    $returnVal[1] = $id;
                 }
             } else {
                 $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
@@ -154,7 +156,7 @@ Class MAIN_DAO extends AbstractDAO{
         $returnVal = [];
         $count = $type = $totalCount = 0;
         try {
-            $query = " SELECT count(id), type FROM media WHERE authid = ? GROUP BY type";
+            $query = "SELECT count(id), type FROM media WHERE authid = ? GROUP BY type";
             $stmt = $this->myslqi->prepare($query);
             $stmt->bind_param('s', $main_dvo->USERID);
 

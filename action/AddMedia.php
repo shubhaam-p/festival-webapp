@@ -89,26 +89,22 @@
             }
 
             //Checking No. of uploaded files previously and No. of files submitted by user now
+            // $remainingLimit - ** As we are uploading media one by one, this wont be used
             if(count($dataOfUploadedFiles) > 0){
                 // check Images
                 if(isset($dataOfUploadedFiles[1]) && ($dataOfUploadedFiles[1] + $imageCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE){
-                    $msg = "You have already uploaded ". $dataOfUploadedFiles[1] ." image files. ";
-                    $remainingLimit = $MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[1];
-                    if($remainingLimit > 0)
-                        $msg .= "Now you can only upload ".($remainingLimit) ." image files";
-                    else
-                        $msg .= "You can not upload this type of file";
-                    
+                    $msg = "You have already uploaded 2 image files. You can try to upload an audio,video or gif file instead.";
                     throw new Exception($msg);
                 }
                 //check Videos, audio
                 if(isset($dataOfUploadedFiles[2]) && ($dataOfUploadedFiles[2] + $otherMediaCount) > $MAX_FILE_COUNT_FOR_EACH_TYPE){
-                    $msg = "You have already uploaded ". $dataOfUploadedFiles[2] ." Audio, Video or GIF files. ";
-                    $remainingLimit = $MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[2];
-                    if($remainingLimit > 0)
-                        $msg .="Now you can only upload ".($remainingLimit) ." Audio or Video or GIF files";
-                    else
-                        $msg .="You can not upload this type of file";
+                    $msg = "You have already uploaded 2 audio video or gif files. You can try to upload an image file instead.";
+                    // $msg = "You have already uploaded ". $dataOfUploadedFiles[2] ." Audio, Video or GIF files. ";
+                    // $remainingLimit = $MAX_FILE_COUNT_FOR_EACH_TYPE - $dataOfUploadedFiles[2];
+                    // if($remainingLimit > 0)
+                    //     $msg .="Now you can only upload ".($remainingLimit) ." Audio or Video or GIF files";
+                    // else
+                    //     $msg .="You can not upload this type of file";
 
                     throw new Exception($msg);
                 }
@@ -131,7 +127,7 @@
                     $uploadStatus[] = [
                         'file' => $originalName,
                         'status' => 2,
-                        'message' => "Invalid file type: $originalName",
+                        'message' => "if you have not already, you may upload audio,video or gif files/image files  ",
                         'MIME type' => $notAllowedMediaArr[$i]  
                     ];
                     continue;
@@ -155,11 +151,20 @@
                     continue;    
                 }
 
+                //***Based on user cheking the type of file he has added - so new user must be added to DB***
                 //if new user is submitting, add it into author table and use that Id to store the media.
-               if(empty($main_dvo->USERID) && isset($main_dvo->AUTHORNAME) && trim($main_dvo->AUTHORNAME) != ''){
+               if(empty($main_dvo->USERID)){
+                    //create dummy name 
+                    if(empty($main_dvo->AUTHORNAME))
+                        $main_dvo->AUTHORNAME = 'dummyUser_'.date('d_m_Y_H_i_s');
+
                     $main_dvo->USERID = $main_dao->addAuthor($main_dvo);
                     if(empty($main_dvo->USERID)){
                         throw new Exception("Error occurred while adding user!");
+                    }
+                    //Empty the name, if its dummy user name
+                    if(preg_match('/dummyUser_/i', $main_dvo->AUTHORNAME)){
+                        $main_dvo->AUTHORNAME = '';
                     }
                     $_SESSION['userId'] = $main_dvo->USERID;
                     $_SESSION['author'] = $main_dvo->AUTHORNAME;

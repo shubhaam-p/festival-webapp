@@ -8,8 +8,8 @@ abstract class AbstractDAO
     public $errorMsg = array();
     public $exceptionMsg = array();
     public $customer_array = array();
-    public $connection = '';
-    public $myslqi = '';
+    public $connection;
+    public $myslqi;
     public $totalRowCountQuery;
     public $php_self;
     public $rows_per_page = 10; //Number of records to display per page
@@ -28,8 +28,17 @@ abstract class AbstractDAO
      * @private
      */
     public function __construct() {
+        
+        $this->connection = new stdClass();
+        $this->myslqi = new stdClass();
+
         $this->connection = DBConnection::getInstance();
         $this->myslqi = $this->connection->getMySQLIConnection();
+
+        if ($this->myslqi->connect_error) {
+            die(" DB Connection failed: " . $this->myslqi->connect_error);
+        }
+        error_log("connected !!");
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
     try {
-        $IPExists = 0;
+        $IPExists = $USERID = $thankYouScreen = 0;
         $dataOfUploadedFiles = [];
 
         if($adminAccess){
@@ -16,20 +16,24 @@
 
         //Check IP exists in DB
         $main_dvo->IPADDR = $functions->getUserIP();
-        $IPExists = $main_dao->checkIfIPExists($main_dvo);
+        [$IPExists, $USERID] = $main_dao->checkIfIPExistsNGetUser($main_dvo);
 
-        if(isset($_COOKIE['userId']) || isset($_SESSION['userId'])){
+        if(!empty($_COOKIE['userId']) || !empty($_SESSION['userId']) || !empty($IPExists)){
+            //This will return the first defined value
+            $main_dvo->USERID = (int)($USERID ?? $_SESSION['userId'] ?? $_COOKIE['userId'] ?? 0);
+            
             //Get count of files uploaded
-            $main_dvo->USERID = isset($_COOKIE['userId'])? $_COOKIE['userId'] : $_SESSION['userId'];
             $dataOfUploadedFiles = $main_dao->getCountOfUploadedFiles($main_dvo);
 
-            if(isset($dataOfUploadedFiles[3])  && $dataOfUploadedFiles[3] >=4)
-                throw new Exception("Session is present, max files (count: $dataOfUploadedFiles[3]) are uploaded and form is previously submitted. User Id - $main_dvo->USERID");
-        }else if (!empty($IPExists)) {
-            throw new Exception("IP address is found and form is submitted.");
+            if(!empty($IPExists)) {
+               error_log("IP address is found and form is submitted. $IPExists, $USERID");
+            }
+            
+            if(isset($dataOfUploadedFiles[3]) && $dataOfUploadedFiles[3] >=4)
+                throw new Exception("Session is present or IP address is found, max files (count: $dataOfUploadedFiles[3]) are uploaded and form is previously submitted. User Id - $main_dvo->USERID");
         }
     } catch (Exception $e) {
         error_log($e->getMessage());
-        die("<h3>You have already submitted this form.</h3>");
+        $thankYouScreen = 1;
     }
 ?>
