@@ -51,11 +51,10 @@
 			imageDoneValue: 0,
 			totalMediaCountValue: NaN,
 			letMeKnow() {
-				console.log('total ',obj.totalMediaCount);
+				// console.log('total ',obj.totalMediaCount);
 				if(!isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
 					
 					AppState.slides = {};
-					AppState.wavesurfer = new Map();
 					AppState.slides = document.querySelectorAll('.media-slide');
 					addLoader(AppState.pageNo);
 					//Reseting the flag
@@ -272,12 +271,6 @@
 		function addLoader(pageNo){
 			console.log("pageno ",pageNo);
 			AppState.slides.forEach((item, index, array) => {
-				//Do not add loader to last 'All done' page
-				if(AppState.isLastPage === true && (index === array.length - 1)){
-					console.log("last 11th record")
-					return;
-				}
-				console.log( item.getAttribute('data-page'))
 
 			let elementPageNo = parseInt(item.getAttribute('data-page'));
 			if(elementPageNo != pageNo){

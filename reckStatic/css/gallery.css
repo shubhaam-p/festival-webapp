@@ -63,7 +63,14 @@ body, html{
   font-size: larger;
   font-weight: 700;
   padding: 1rem 0;
+}
 
+.media-caption{
+  display: none;
+}
+
+.media-slide.loaded .media-caption {
+  display: block;
 }
 
 /* media slide  */

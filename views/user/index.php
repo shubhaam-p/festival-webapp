@@ -120,11 +120,11 @@
         const fileLabel = document.getElementById('fileLabel');
         const fileCountText = document.getElementById('fileCountText');
         const formContent = document.getElementById('form-content');
+        const imageInputerror = document.getElementById('imageInput-error');
         const thankYouScreen = <?php echo $thankYouScreen?>;
     
         if(thankYouScreen == 1){
             formContent.innerHTML='<div class="form-row mb-3 border-thankyou"><h1>You\'ve already responded.</h1></div>';
-            // return;
         }
 
         fileInput.addEventListener('change', () => {
@@ -133,6 +133,7 @@
         if (count === 0) {
             fileCountText.textContent = "0 files selected";
         } else if (count === 1) {
+            imageInputerror.textContent = "";
             let fileName = fileInput.files[0].name;
             fileName = fileName.length > 10? fileName.slice(0, 10)+'...': fileName ;
             fileCountText.textContent = fileName;
@@ -140,7 +141,7 @@
         });
 
     </script>
-        <!-- JavaScript Libraries -->
+     <!-- JavaScript Libraries -->
     <script src="<?php echo $webURL;?>reckStatic/js/jquery-3.4.1.min.js"></script>
     <script src="<?php echo $webURL;?>reckStatic/js/jquery.validate.min.js"> </script> 
     <script src="<?php echo $webURL;?>reckStatic/js/bootstrap.bundle.min.js"></script>
