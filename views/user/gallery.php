@@ -166,7 +166,7 @@
 			await listGalleryMediaFiles(calledAgain, (pageNo+1)).then(async (result)=>{
 				if(result?.total == 0){
 					let div = document.createElement("div");
-					div.innerHTML = '<div>Packages are currenly unavailable!</div>';
+					div.innerHTML = '<div>Posts are currenly unavailable!</div>';
 					mediaList.append(div);
 				}else{
 					let mediaFile = result.data;
