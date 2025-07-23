@@ -20,13 +20,13 @@
     $main_dao = new MAIN_DAO();
     $functions = new Functions();
 
-    $save = $error = $msg = $videoFileCount = $adminAccess = '';
+    $save = $error = $msg = $videoFileCount = $adminAccess = $key = '';
     $queryXML = str_replace("\'", "'", $_REQUEST["xmlData"]);
     $xml = simplexml_load_string(htmlspecialchars_decode($queryXML));
     
     $result = $xml->xpath("//admin");
     if(isset($result[0]) && $result[0] != null){
-        $adminAccess = $functions->sanitizeInput(trim($result[0]));
+        $key = $adminAccess = (int) $functions->sanitizeInput(trim($result[0]));
     }
     $result = $xml->xpath("//author");
     if(isset($result[0]) && $result[0] != null){

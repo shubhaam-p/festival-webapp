@@ -9,11 +9,10 @@
     $main_dvo = new MAIN_DVO();
     $main_dao = new MAIN_DAO();
 
-    $adminAccess = 0;
+    $adminAccess = $key = 0;
     $author = "";
-    if( !empty($_REQUEST['admin'] ) && $_REQUEST['admin']>0 ){
-        $admin = (int) trim($_REQUEST['admin']);
-        $adminAccess = 1;
+    if(!empty($_REQUEST['admin'] ) && $_REQUEST['admin']>0){
+        $key = (int) trim($_REQUEST['admin']);
     }
 
     require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
@@ -107,7 +106,7 @@
                         <button class="button-1" type="submit" id="submitFormButton">Submit</button>
                     </div>
 
-                    <input type="hidden" name="adminAccess" id="adminAccess" value="<?=$adminAccess?>">
+                    <input type="hidden" name="adminAccess" id="adminAccess" value="<?=$key?>">
                 </form>
                 <div class="submit-response-msg text-left"></div>
             </div>
@@ -121,11 +120,6 @@
         const fileCountText = document.getElementById('fileCountText');
         const formContent = document.getElementById('form-content');
         const imageInputerror = document.getElementById('imageInput-error');
-        const thankYouScreen = <?php echo $thankYouScreen?>;
-    
-        if(thankYouScreen == 1){
-            formContent.innerHTML='<div class="form-row mb-3 border-thankyou"><h1>You\'ve already responded.</h1></div>';
-        }
 
         fileInput.addEventListener('change', () => {
         const count = fileInput.files.length;
