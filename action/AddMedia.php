@@ -142,7 +142,7 @@
                     continue;
                 }
 
-                if ((in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_IMAGE) && $fileSizes[$i] > $maxFileSizeImage) || (in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_OTHER_MEDIA) && $fileSizes[$i] > $maxFileSizeOtherMedia)) {
+                if (empty($adminAccess) && ((in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_IMAGE) && $fileSizes[$i] > $maxFileSizeImage) || (in_array($main_dvo->MIMETYPE, $CONST_MIME_TYPE_OTHER_MEDIA) && $fileSizes[$i] > $maxFileSizeOtherMedia))) {
                     $uploadStatus[] = [
                         'file' => $originalName,
                         'status' => 2,
@@ -160,7 +160,7 @@
 
                     $main_dvo->USERID = $main_dao->addAuthor($main_dvo);
                     if(empty($main_dvo->USERID)){
-                        throw new Exception("Error occurred while adding user!");
+                        throw new Exception("Error occurred processing the request!");//Error while adding the user
                     }
                     //Empty the name, if its dummy user name
                     if(preg_match('/dummyUser_/i', $main_dvo->AUTHORNAME)){

@@ -1,13 +1,14 @@
 <?php
 
-$maxPostSize = 4000 * 1024; // 4 MB limit
+$maxPostSize = 128000 * 1024; // 128 MB limit- from server side
 
 if (isset($_SERVER['CONTENT_LENGTH']) && $_SERVER['CONTENT_LENGTH'] > $maxPostSize) {
     // http_response_code(413); // Payload Too Big
     $returnArray = [
         'status'=>2,
         'desc-error'=>'Post Limit exceeded!!',
-        'message'=> 'Total upload size exceeds, please check guidlines to upload media.'
+        'message'=> 'File too large!'
+        // 'message'=> 'Total upload size exceeds, please check guidlines to upload media.'
     ];
     $a = json_encode($returnArray);
     die($a);
