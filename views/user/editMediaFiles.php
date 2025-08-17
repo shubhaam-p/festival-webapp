@@ -120,7 +120,7 @@
             $('#pagenum').val(page[1]);
             getPaginationBar().then(
                 async function(result){
-                  console.log(result);  
+                //   console.log(result);  
                   await addDataToPaginationBar(result)
                 }
             )
