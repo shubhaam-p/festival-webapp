@@ -46,11 +46,12 @@
 <body>
 
 	<div class="">
-         <table class="table table-hover">
+         <table class="table table-bordered  table-hover table-striped">
             <thead>
             <tr>
+                <th class="col-1">#</th>
                 <th class="col-5">Media</th>
-                <th class="col-4">Caption</th>
+                <th class="col-3">Caption</th>
                 <th class="col-3">Action</th>
             </tr>
             </thead>

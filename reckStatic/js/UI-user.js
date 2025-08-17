@@ -13,7 +13,7 @@ async function listGalleryMediaFiles(calledAgain = false, page = 0){
 
 //For admin page
 async function listAdminMediaFiles(page = 'page1', addToPage = false){
-    console.log("clicked file", page, addToPage)
+    // console.log("clicked file", page, addToPage)
     let pagination = '1';
     let pageNo = page.split('page')[1];
     $('#pagenum').val(pageNo);
@@ -54,7 +54,7 @@ async function editMedia(mediaId = 0, status = 0){
 }
 
 async function getPaginationBar(page = 1, addToPage = false){  
-    console.log("pagination bar ",page, addToPage);
+    // console.log("pagination bar ",page, addToPage);
     let pageNo = page;
 
     let res = await makeAjaxCall({
@@ -71,11 +71,11 @@ async function getPaginationBar(page = 1, addToPage = false){
 
 async function addDataToDom(result){
     let mediaList = document.getElementById("media-list-admin");
-
-    console.log(result);            
+    // console.log(result);            
     if(result.total <= 0)
     mediaList.innerHTML = "<br>Data not found!<br>"
-    
+   
+    mediaList.innerHTML = ''; 
     let tr = file = mimeType = cls = '';
     result.data.forEach((element, i, array) => {
         tr = document.createElement("tr");
@@ -97,7 +97,8 @@ async function addDataToDom(result){
             break;
         }
 
-        tr.innerHTML = `<td>${file}</td>
+        tr.innerHTML = `<td>${i+1}</td>
+                        <td>${file}</td>
                         <td>${element.CAPTION}</td>
                         <td>
                             <span title="Delete" class="delete-action-btn"  data-bs-toggle="modal" data-bs-target="#editFileModal" data-toggle="modal" data-target=".confirm-modal" row-id="${element.ID}" row-action="3">
