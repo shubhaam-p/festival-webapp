@@ -4,6 +4,16 @@ require $_SERVER['DOCUMENT_ROOT'] . "/dao/ABSTRACT-DAO.php";
 
 Class MAIN_DAO extends AbstractDAO{
 
+    public $rows_per_page = 10; //Number of records to display per page
+    public $total_rows = 0; //Total number of rows returned by the query
+    public $links_per_page = 5; //Number of links to display per page
+    public $page = 1;
+    public $max_pages = 0;
+    public $offset = 0;
+    public $startnum = 1;
+    public $endnum = 0;
+    public $pagination = 'ON';
+
     function employerLoginAuth($main_dvo):int{
         $returnVal = 0;
         $aid = $DTPASSWORD = $password = $userId = "";
@@ -152,6 +162,7 @@ Class MAIN_DAO extends AbstractDAO{
         return $returnVal;
     }
    
+    //Used to track no of files uploaded by user
     public function getCountOfUploadedFiles($main_dvo):array {
         $returnVal = [];
         $count = $type = $totalCount = 0;
@@ -178,5 +189,197 @@ Class MAIN_DAO extends AbstractDAO{
         }
         return $returnVal;
     }
+
+    //Used to confirm that media file exists before deleting it
+    public function getMediaById($main_dvo):array {
+        $returnVal = [];
+        try {
+            $query = "SELECT id, url FROM media WHERE id = ? AND status = 1";
+            $stmt = $this->myslqi->prepare($query);
+            $stmt->bind_param('i', $main_dvo->UNIQUEID);
+
+            $NID = $MEDIAURL = '';
+            if ($stmt->execute()) {
+                $stmt->bind_result($NID, $MEDIAURL);
+                if ($stmt->fetch()) {
+                    $returnVal['ID'] = $NID;
+                    $returnVal['MEDIA'] = $MEDIAURL;
+                }
+            } else {
+                $this->logError($this->myslqi->errno, $this->myslqi->error, 'getAllPackages');
+            }
+            $stmt->free_result();
+            $stmt->close();
+        } catch (Exception $e) {
+            $this->logException($e);
+        }
+        return $returnVal;
+    }
+
+     //status = (3-delete)
+    function changeStatus($main_dvo, $status = 0){
+        $returnVal = 0;
+        try {
+            $query="UPDATE media SET status = ?, updatedat = NOW() WHERE id = ?";
+            try {
+                $stmt = $this->myslqi->prepare($query);
+                $stmt->bind_param('ii', $status ,$main_dvo->UNIQUEID);
+            } catch (\Throwable $th) {
+                $this->logException($th);
+                return $returnVal;
+            }
+
+            if ($stmt->execute()) {   
+                $returnVal = 1;
+            }
+            $stmt->free_result();
+            $stmt->close();
+        } catch (Exception $e) {
+            $this->logException($e);
+            $returnVal = 0;
+        }
+        return $returnVal;
+    }
+
+
+    //For pagination
+    function paginate() {
+        $returnVal = $count = 0;
+        try {
+            $totalRowCountQuery = "SELECT count(id) FROM media WHERE status = 1";
+            $stmt = $this->myslqi->prepare($totalRowCountQuery);
+            if ($stmt->execute()) {
+                $stmt->bind_result($count);
+                while ($stmt->fetch()) {
+                    $this->total_rows = $count;
+                    
+                    //Max number of pages
+                    $this->max_pages = ceil($this->total_rows / $this->rows_per_page);
+                    if ($this->links_per_page > $this->max_pages) {
+                        $this->links_per_page = $this->max_pages;
+                    }
+
+                    //Check the page value just in case someone is trying to input an aribitrary value
+                    if ($this->page > $this->max_pages || $this->page <= 0) {
+                        $this->page = 1;
+                    }
+            
+                    //Calculate Offset
+                    $this->offset = $this->rows_per_page * ($this->page - 1);
+                }
+            } else {
+                $this->logError($this->myslqi->errno, $this->myslqi->error, 'paginate');
+                $this->logException($this->myslqi->error);
+                return  0;
+            }
+        }catch (Exception $e) {
+            $this->logException($e);
+            $returnVal = 0;
+        }
+        return $returnVal;
+    }
+
+    function renderFirst($str, $tag = 'First') {
+        if ($this->total_rows == 0)
+            return FALSE;
+        if ($this->page != 1) {
+
+            if ($this->page == 1) {
+                $page = 1;
+                $str = str_replace('~pagenum~', $page, $str);
+
+                return "<li class='page-item active'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            } else {
+                $page = 1;
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            }
+        }
+    }
+
+    function renderLast($str, $tag = 'Last') {
+        if ($this->total_rows == 0)
+            return FALSE;
+        if ($this->page != $this->max_pages) {
+            if ($this->page == $this->max_pages) {
+                $page = 1;
+    
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item active'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            } else {
+                $page = $this->max_pages;
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item'><a class='page-link' onclick='$str' href='javascript:void(0)'>$tag</a></li>";
+            }
+        }
+    }
+
+    function renderNext($str, $tag = 'Next') {
+        if ($this->total_rows == 0)
+            return FALSE;
+        if ($this->page != $this->max_pages) {
+            if ($this->page < $this->max_pages) {
+                $page = $this->page + 1;
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            } else {
+                return "<li class='page-item active'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            }
+        }
+    }
+
+    function renderPrev($str, $tag = 'Prev') {
+        if ($this->total_rows == 0)
+            return FALSE;
+        if ($this->page != 1) {
+            if ($this->page > 1) {
+                $page = $this->page - 1;
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            } else {
+                $page = $this->page - 1;
+                $str = str_replace('~pagenum~', $page, $str);
+                return "<li class='page-item active'> <a class='page-link' onclick='$str' href='javascript:void(0);'>$tag</a></li>";
+            }
+        }
+    }
+
+    function renderNav($str, $prefix = "<li class='page-item'>", $suffix = "</li>") {
+        if ($this->total_rows == 0)
+            return FALSE;
+        $batch = ceil($this->page / $this->links_per_page);
+        $end = $batch * $this->links_per_page;
+
+        if ($end > $this->max_pages) {
+            $end = $this->max_pages;
+        }
+        $start = $end - $this->links_per_page + 1;
+        $links = '';
+        $tempstr = $str;
+        for ($i = $start; $i <= $end; $i++) {
+            $page = $i;
+            $str = str_replace('~pagenum~', $page, $tempstr);
+            if ($i == $this->page) {
+                $links .= "<li class='page-item active'><a class='page-link' href='javascript:void(0);'' >$i</a></li>";
+            } else {
+                $links .= " $prefix <a class='page-link' onclick='$str' href='javascript:void(0);'> $i</a>$suffix ";
+            }
+        }
+        return $links;
+    }
+
+    function renderFullNav($str) {
+        $this->paginate();
+        if ($this->total_rows > $this->rows_per_page) {
+            // error_log("first -- ".$this->renderFirst($str));
+            // error_log("Prev -- ".$this->renderPrev($str));
+            // error_log("Nav -- ".$this->renderNav($str));
+            // error_log("Last -- ".$this->renderLast($str));
+            // error_log("Next -- ".$this->renderNext($str));
+            
+            return $this->renderPrev($str) . $this->renderNav($str) . $this->renderNext($str);
+        }
+    }
+    //For pagination
 }
 ?>

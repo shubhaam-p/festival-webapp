@@ -31,6 +31,8 @@ set_exception_handler('myExceptionHandler');
 $arrActions=array();
 $arrActions['addMedia'] 			= '../action/AddMedia.php';
 $arrActions['listMedia'] 			= '../action/GetMedia.php';
+$arrActions['editMedia'] 			= '../action/EditMedia.php';
+$arrActions['getPaginationBar'] 	= '../action/GetPaginationBar.php';
 
 $action = $_REQUEST['action'];
 if($arrActions[$action]) {

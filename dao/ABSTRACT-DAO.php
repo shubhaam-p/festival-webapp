@@ -21,7 +21,8 @@ abstract class AbstractDAO
     public $startnum = 1;
     public $endnum = 0;
     public $pagination = 'ON'; //Default pagination is ON
-    
+    public $errCd = '';
+    public $funcName = '';
     
     /**
      * [[Description]]
@@ -49,7 +50,7 @@ abstract class AbstractDAO
         try {
             //array_push($this->exceptionMsg, $e->getMessage());
             $this->exceptionMsg[] = $e->getMessage();
-            error_log("Error in DAO :: ".$e->getMessage());
+            error_log("logException :: Error in DAO :: ".$e->getMessage());
         } catch (Exception $e1) {
             
         }
@@ -69,6 +70,7 @@ abstract class AbstractDAO
             //echo $errcd . ':[' . $functionName . ']' . $errmsg;
             $this->errorMsg = $errmsg;
             $this->funcName = $functionName;
+            error_log("logError :: Error in DAO :: ".$errcd, $errmsg, $functionName);
         } catch (Exception $e1) {
             
         }
