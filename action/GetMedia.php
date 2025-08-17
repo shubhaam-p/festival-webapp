@@ -13,7 +13,7 @@
     include '../Functions.class.php';
     
     //Can use this to list media for admin
-    $isHomePage = '';
+    $isHomePage = $isAdminPage = '';
     $returnArray = $data = $scannedData =  [];
     $page = 1;
     
@@ -25,8 +25,8 @@
         $isHomePage = $functions->sanitizeInput($_GET['home']);
     }
 
-    if(isset($_GET['home']) && $_GET['home'] != '') {
-        $isHomePage = $functions->sanitizeInput($_GET['home']);
+    if(isset($_GET['admin']) && $_GET['admin'] != '') {
+        $isAdminPage = $functions->sanitizeInput($_GET['admin']);
     }
 
     if($CONST_PAGINATION_STATUS === 1 && !empty($_GET['page']) && $_GET['page'] != '') {
@@ -35,7 +35,7 @@
         $main_dvo->PAGINATION = $CONST_PAGINATION_STATUS;
     }
 
-    if(!empty($isHomePage)){
+    if(!empty($isHomePage) || !empty($isAdminPage)){
         $main_dvo->LIMIT = $CONST_FETCH_IMAGE_LIMIT;
         
         //Returns media array and last id of media
@@ -60,12 +60,14 @@
         }
 
         //@todo - Add block to fetch files again, if array count is less than 5, after scanning them above.
-
-        //To get new media each time
-        shuffle($scannedData);
+        
+        //To get new media each time only for home page
+        if(!empty($isHomePage)){
+            shuffle($scannedData);
+        }
 
         //Add last page here only
-        if(!empty($isLastPage)){
+        if(!empty($isLastPage) && !empty($isHomePage)){
             array_push($scannedData, array('ID'=>0, 'MIMETYPE'=>'last/slide'));
         }
 

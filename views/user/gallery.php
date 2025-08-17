@@ -7,16 +7,14 @@
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Gallery</title>
+	<title>Archive</title>
 	<link href="<?php echo $webURL;?>reckStatic/css/bootstrap.min.css" rel="stylesheet"  crossorigin="anonymous">
     <link rel="stylesheet" href="<?php echo $webURL;?>reckStatic/css/gallery.css">
 </head>
 <body>
 
 	<div class="page-container">
-		<div class="row g-4">
-            <div id="media-list"></div>
-		</div>
+        <div id="media-list"></div>
 	</div>
     <script>
         const webURL = "<?php echo $webURL;?>";
@@ -53,11 +51,10 @@
 			imageDoneValue: 0,
 			totalMediaCountValue: NaN,
 			letMeKnow() {
-				console.log('total ',obj.totalMediaCount);
+				// console.log('total ',obj.totalMediaCount);
 				if(!isNaN(obj.totalMediaCount) && obj.totalMediaCount <=0){
 					
 					AppState.slides = {};
-					AppState.wavesurfer = new Map();
 					AppState.slides = document.querySelectorAll('.media-slide');
 					addLoader(AppState.pageNo);
 					//Reseting the flag
@@ -169,7 +166,7 @@
 			await listGalleryMediaFiles(calledAgain, (pageNo+1)).then(async (result)=>{
 				if(result?.total == 0){
 					let div = document.createElement("div");
-					div.innerHTML = '<div>Packages are currenly unavailable!</div>';
+					div.innerHTML = '<div>Posts are currenly unavailable!</div>';
 					mediaList.append(div);
 				}else{
 					let mediaFile = result.data;
@@ -268,21 +265,12 @@
 				$('#waveform-'+ID).css('display','block')
 			})
 	
-			wsInstance.on('finish', () => {
-				$('#playPause-'+ID).children()[0].src = `${webURL}reckStatic/images/play.png`
-			});
 		}
 
 		//Add skeleton loader instaed of rounf
 		function addLoader(pageNo){
 			console.log("pageno ",pageNo);
 			AppState.slides.forEach((item, index, array) => {
-				//Do not add loader to last 'All done' page
-				if(AppState.isLastPage === true && (index === array.length - 1)){
-					console.log("last 11th record")
-					return;
-				}
-				console.log( item.getAttribute('data-page'))
 
 			let elementPageNo = parseInt(item.getAttribute('data-page'));
 			if(elementPageNo != pageNo){

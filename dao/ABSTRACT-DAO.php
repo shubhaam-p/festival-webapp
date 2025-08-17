@@ -8,8 +8,8 @@ abstract class AbstractDAO
     public $errorMsg = array();
     public $exceptionMsg = array();
     public $customer_array = array();
-    public $connection = '';
-    public $myslqi = '';
+    public $connection;
+    public $myslqi;
     public $totalRowCountQuery;
     public $php_self;
     public $rows_per_page = 10; //Number of records to display per page
@@ -21,15 +21,25 @@ abstract class AbstractDAO
     public $startnum = 1;
     public $endnum = 0;
     public $pagination = 'ON'; //Default pagination is ON
-    
+    public $errCd = '';
+    public $funcName = '';
     
     /**
      * [[Description]]
      * @private
      */
     public function __construct() {
+        
+        $this->connection = new stdClass();
+        $this->myslqi = new stdClass();
+
         $this->connection = DBConnection::getInstance();
         $this->myslqi = $this->connection->getMySQLIConnection();
+
+        if ($this->myslqi->connect_error) {
+            die(" DB Connection failed: " . $this->myslqi->connect_error);
+        }
+        error_log("connected !!");
     }
 
     /**
@@ -40,7 +50,7 @@ abstract class AbstractDAO
         try {
             //array_push($this->exceptionMsg, $e->getMessage());
             $this->exceptionMsg[] = $e->getMessage();
-            error_log("Error in DAO :: ".$e->getMessage());
+            error_log("logException :: Error in DAO :: ".$e->getMessage());
         } catch (Exception $e1) {
             
         }
@@ -60,6 +70,7 @@ abstract class AbstractDAO
             //echo $errcd . ':[' . $functionName . ']' . $errmsg;
             $this->errorMsg = $errmsg;
             $this->funcName = $functionName;
+            error_log("logError :: Error in DAO :: ".$errcd, $errmsg, $functionName);
         } catch (Exception $e1) {
             
         }

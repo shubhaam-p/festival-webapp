@@ -17,5 +17,6 @@
        public $CAPTION;
        public $OFFSET;
        public $PAGINATION;
+       public $UNIQUEID;
     }
 ?>

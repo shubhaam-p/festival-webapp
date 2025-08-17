@@ -9,11 +9,10 @@
     $main_dvo = new MAIN_DVO();
     $main_dao = new MAIN_DAO();
 
-    $adminAccess = 0;
+    $adminAccess = $key = 0;
     $author = "";
-    if( !empty($_REQUEST['admin'] ) && $_REQUEST['admin']>0 ){
-        $admin = (int) trim($_REQUEST['admin']);
-        $adminAccess = 1;
+    if(!empty($_REQUEST['admin'] ) && $_REQUEST['admin']>0){
+        $key = (int) trim($_REQUEST['admin']);
     }
 
     require $_SERVER['DOCUMENT_ROOT'] . '/ValidateUser.php';
@@ -26,11 +25,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Form</title>
-	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/CSS/style2.css?ver=<?=$VER?>">
+	<link rel="stylesheet" href="<?php echo $webURL; ?>reckStatic/css/style.css?ver=<?=$VER?>">
 </head>
 <body>
     <div class="my-3"> 
-        <div class="review-form-cont">
+        <div class="review-form-cont" id="form-content">
             <div class="form-row mb-3">
                 <h1 class="text-primary text-uppercase titleForm"> ANGKOR, WHAT?!</h1>
                 <h6 class="textGreyColor line subtitleForm">Join us in creating an inconclusive anthology of the <span class="font-weight-semi-bold">Angkor Photo Festival & Workshops </span></h6>
@@ -85,7 +84,8 @@
                                     </div>
                                 </span>
                             </div>
-                            <input class="form-control" type="file" name="file[]" id="imageInput" accept="image/*,video/*,audio/*">
+                            <label id="imageInput-error" class="error" for="imageInput"></label>
+                            <input class="form-control" type="file" name="mediaFile" id="imageInput" accept="image/*,video/*,audio/*">
                         </div>
                     </div>
                     <div class="form-row">
@@ -106,9 +106,9 @@
                         <button class="button-1" type="submit" id="submitFormButton">Submit</button>
                     </div>
 
-                    <input type="hidden" name="adminAccess" id="adminAccess" value="<?=$adminAccess?>">
+                    <input type="hidden" name="adminAccess" id="adminAccess" value="<?=$key?>">
                 </form>
-                <div class="submit-response-msg text-center"></div>
+                <div class="submit-response-msg text-left"></div>
             </div>
         </div>
     </div>
@@ -118,13 +118,16 @@
         const fileInput = document.getElementById('imageInput');
         const fileLabel = document.getElementById('fileLabel');
         const fileCountText = document.getElementById('fileCountText');
-    
+        const formContent = document.getElementById('form-content');
+        const imageInputerror = document.getElementById('imageInput-error');
+
         fileInput.addEventListener('change', () => {
         const count = fileInput.files.length;
     
         if (count === 0) {
             fileCountText.textContent = "0 files selected";
         } else if (count === 1) {
+            imageInputerror.textContent = "";
             let fileName = fileInput.files[0].name;
             fileName = fileName.length > 10? fileName.slice(0, 10)+'...': fileName ;
             fileCountText.textContent = fileName;
@@ -132,7 +135,7 @@
         });
 
     </script>
-        <!-- JavaScript Libraries -->
+     <!-- JavaScript Libraries -->
     <script src="<?php echo $webURL;?>reckStatic/js/jquery-3.4.1.min.js"></script>
     <script src="<?php echo $webURL;?>reckStatic/js/jquery.validate.min.js"> </script> 
     <script src="<?php echo $webURL;?>reckStatic/js/bootstrap.bundle.min.js"></script>

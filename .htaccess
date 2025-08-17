@@ -25,6 +25,19 @@
 <ifModule mod_headers.c>
   Header set Access-Control-Allow-Origin "*"
   Header set Access-Control-Allow-Headers: "headers, Origin, X-Requested-With, Content-Type, Accept, Authorization"
+
+  <FilesMatch "\.(php)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+
+  <FilesMatch "\.(jpg|jpeg|png|gif|mp4|webm|svg)$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires 0
+  </FilesMatch>
+
 </ifModule>
 # END Cache-Control Headers
 
@@ -55,13 +68,11 @@ DirectorySlash Off
 #RewriteRule ^(.*)$ https://www.%{HTTP_HOST}/$1 [R=301,L]
 ErrorDocument 404 /404.php
 
-RewriteRule ^new-cont-reg$ controller/Controller.php?n=$1 [NC,L,QSA]
-
 # RewriteRule ^/?$ views/index.php
 RewriteRule ^/?$ views/user/index.php
-RewriteRule ^admin/upload/([0-9]+)$ views/user/index.php?admin=$1 [L,QSA]
-RewriteRule ^gallery?$ views/user/gallery.php
-RewriteRule ^user/form?$ action/action.php
+RewriteRule ^admin/form/([0-9]+)$ views/user/index.php?admin=$1 [L,QSA]
+RewriteRule ^archive?$ views/user/gallery.php
+RewriteRule ^admin/archive?$ views/user/editMediaFiles.php
 RewriteRule ^new-cont-reg?$ controller/controller.php
 
 RewriteCond %{REQUEST_FILENAME} !-f

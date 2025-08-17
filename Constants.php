@@ -6,7 +6,7 @@
     $CONST_REPLACE_STR = 'CAAS';
     define('CONST_REPLACE_STR', $CONST_REPLACE_STR);
     $COOKIEDOMAIN = isset($_SERVER['SERVER_NAME']) ? $_SERVER['SERVER_NAME'] : '';
-    $VER = '0.1';
+    $VER = '0.3';
 
     $CONST_FETCH_IMAGE_LIMIT = 11;//Fetching one extra media, to know end of records
     $CONST_PAGINATION_STATUS = 1;
@@ -39,5 +39,7 @@
 
     $MAX_POST_SIZE = 4000 * 1024; // 4 MB limit ***not in use**
 
-    $CONST_ADMIN_UID = 1; //Admin ID for unlimited uploads
+    // Mapped AF UID to Admin ID from live
+    //Admin ID for unlimited uploads
+    $MAP_KEY_TO_ADMIN = [3435221=>4];
 ?>  
