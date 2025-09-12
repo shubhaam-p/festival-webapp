@@ -30,11 +30,7 @@
 		const mediaList = document.getElementById("media-list");
 		mediaList.innerHTML = "";
 		let result = cls = '';
-		let startY = 0;
-		let isScrolling = false;
-		let isPinching = false;
 		let pauseScrollTimeInSec = 400;//Pause the scrolling after media scrolled
-		let fetchMediaFnCalled = 0;//Wait till media is listed in dom, before next call -- Additional flag
 		const callFechFnBeforeNoOfFiles = <?=$CONST_FETCHFN_BEFORE_QUEUE_ENDS?>
 	
 		const AppState = {
@@ -45,6 +41,10 @@
 			endOfSlideShown: 0,//Flag if end slide shown after last media
 			current: 0,
 			isFirstSlideAdded: 0,//Flag used to add active class
+			isScrolling : false,
+			isPinching : false,
+			fetchMediaFnCalled : 0,//Wait till media is listed in dom, before next call -- Additional flag
+	 		startY : 0
 		};
 
 		let obj = {
@@ -58,7 +58,7 @@
 					AppState.slides = document.querySelectorAll('.media-slide');
 					addLoader(AppState.pageNo);
 					//Reseting the flag
-					fetchMediaFnCalled = 0;
+					AppState.fetchMediaFnCalled = 0;
 				}
 			},
 			get imageDone() {
@@ -81,14 +81,16 @@
 		await callListGalleryMediaFiles();
 
 		async function showNextSlide(){
-			if (AppState.current < AppState.slides.length - 1) {
-				if(AppState.isLastPage === false && (AppState.slides.length - 1 - AppState.current) == callFechFnBeforeNoOfFiles && fetchMediaFnCalled == 0){
-					fetchMediaFnCalled = 1;
+			console.log("ss ", AppState.isLastPage, AppState.endOfSlideShown, AppState.current, AppState.slides.length)
+			if (AppState.current < AppState.slides.length - 1 || (AppState.isLastPage === true && AppState.endOfSlideShown === 1)) {
+				if(AppState.isLastPage === false && (AppState.slides.length - 1 - AppState.current) == callFechFnBeforeNoOfFiles && AppState.fetchMediaFnCalled == 0){
+					AppState.fetchMediaFnCalled = 1;
 					obj.totalMediaCount = NaN;
 					//Pagination call - Fetch media
 					await callListGalleryMediaFiles(1, AppState.pageNo);
 				}
-				
+
+				//Pause instance of WS here on swiping audio file
 		    	const datatype = $(AppState.slides[AppState.current]).find('.audio-wrapper').attr('data-type') ?? '';
 				switch (datatype) {
 					case 'audio':
@@ -96,23 +98,43 @@
 						id = id!==0? parseInt(id):0;
 						const instance = AppState.wavesurfer.get(id);
 						if (instance && id) {
-							instance.destroy();
-							AppState.wavesurfer.delete(id);
-							console.log(`Destroyed WaveSurfer: ${id}`, AppState.wavesurfer);
+							instance.pause();
+							instance.seekTo(0);
+							//Changes for never ending scroll
+							// AppState.wavesurfer.delete(id);
+							console.log(`Pause WaveSurfer: ${id}`, AppState.wavesurfer);
 						}
 						break;
 				
 					default:
-						console.log("default switch")
+						// console.log("default switch")
 						break;
 				}
 
 				//Added this after switch block because, switch was deleting next instance rather than current
 				AppState.slides[AppState.current].classList.remove('active');
-				AppState.current++;
+
+				if(AppState.endOfSlideShown == 1 && AppState.current != 0)
+					AppState.current = 0
+				else{
+					AppState.current++;
+					AppState.endOfSlideShown = 0
+				}
+
 				AppState.slides[AppState.current].classList.add('active');
 				AppState.slides[AppState.current].scrollIntoView({ behavior: "smooth", block: "start" });
-			} else if(AppState.isLastPage === true && AppState.endOfSlideShown === 0){
+				
+				if(AppState.isLastPage === true && AppState.current == AppState.slides.length - 1){
+					console.log("never ending scroll ",AppState.current);
+					// AppState.slides[AppState.current].classList.remove('active');
+					// AppState.current = 0; 
+					AppState.endOfSlideShown = 1;
+					// AppState.slides = {};
+					// AppState.slides = document.querySelectorAll('.media-slide');
+				}
+
+			}
+			else if(AppState.isLastPage === true && AppState.endOfSlideShown === 0){
 				AppState.endOfSlideShown = 1
 				console.log("You've seen all of posts!");
 			} else {
@@ -124,42 +146,52 @@
 		// Swipe up detection (basic touch event)
 		window.addEventListener('touchstart', (e) => {
 			if (e.touches.length > 1) {
-				isPinching = true; // Pinch gesture
+				AppState.isPinching = true; // Pinch gesture
 			} else {
-				isPinching = false;
-				startY = e.touches[0].clientY;
+				AppState.isPinching = false;
+				AppState.startY = e.touches[0].clientY;
 			}
 		});
 
 		window.addEventListener('touchend', (e) => {
-			if(isScrolling || isPinching) return;
+			if(AppState.isScrolling || AppState.isPinching) return;
 
 			const endY = e.changedTouches[0].clientY;
-			const deltaY = startY - endY;
+			const deltaY = AppState.startY - endY;
 
 			if (deltaY > 50) {
+				AppState.isScrolling = true;
 				showNextSlide();
 				console.log("touchend - swipe")
-				setTimeout(()=>{
-					isScrolling = false;
-				}, pauseScrollTimeInSec);
+				resetScrollingFlag();
 			}
 		});
 
 		// Scroll down detection for non-touch devices
 		window.addEventListener('wheel', (e) => {
-			if(isScrolling) return;
+			if(AppState.isScrolling) 
+				return;
+
 			if (e.deltaY > 20) {
-				isScrolling = true;
+				AppState.isScrolling = true;
 				console.log("wheel - swipe")
-				showNextSlide();	
+				showNextSlide();
+				resetScrollingFlag();
 			}
-			setTimeout(()=>{
-				isScrolling = false;
-			}, pauseScrollTimeInSec);
-			
 			}, { passive: true }
 		);
+
+		document.addEventListener('keydown', (e) => {
+
+			if(AppState.isScrolling) return;
+
+			if (e.key === 'ArrowDown') {
+				console.log('Down arrow key pressed!');
+				AppState.isScrolling = true;
+				showNextSlide();
+				resetScrollingFlag();
+			}
+		});
 
 		//Fetch images
 		async function callListGalleryMediaFiles(calledAgain = 0, pageNo = 0){
@@ -187,12 +219,12 @@
 					let file = ''; 
 					switch(mimeType[0]){
 						case 'image':
-							file = `<img src="${mediaFile[i].MEDIA}" class="${cls}" data-type="image" loading="lazy">
+							file = `<img src="${mediaFile[i].MEDIA}" class="${cls}" data-type="image" loading="lazy" data-id="${mediaFile[i].ID}">
 									<div class="media-caption">${mediaFile[i].CAPTION}</div>`;
 							break;
 
 						case 'video':
-							file = `<video src="${mediaFile[i].MEDIA}" class="${cls}" data-type="video" controls></video>
+							file = `<video src="${mediaFile[i].MEDIA}" class="${cls}" data-type="video" controls data-id="${mediaFile[i].ID}"></video>
 									<div class="media-caption">${mediaFile[i].CAPTION}</div>`;
 							break;
 
@@ -200,10 +232,10 @@
 							isAudio = 1;
 							file = `
 									<div class="audio-wrapper" data-id="${mediaFile[i].ID}" data-type="audio">
-										<div class="audio-title">${mediaFile[i].CAPTION}</div>
 										<div class="audio-container">
 											<div id="waveform-${mediaFile[i].ID}" class="waveform" style="display: none;"></div>
 										</div>
+									<div class="audio-title">${mediaFile[i].CAPTION}</div>
 									</div>`;
 
 							break;
@@ -256,50 +288,60 @@
 			const wsInstance =  WaveSurfer.create(options);
 			AppState.wavesurfer.set(ID, wsInstance);
 
-			loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
+			// loadingText = '<p css="loading" style="height:20px; width=119px;">Loading...</p>'
+			loadingText = '<div class="loader"></div>'
 			$('#waveform-'+ID+'').css('display','none')
+			$('[data-id='+ID+'] > .audio-title').css('display','none')
 			$(loadingText).insertAfter('#waveform-'+ID+'')
 			
 			wsInstance.on('ready',()=>{
-				$('#waveform-'+ID+' + p').remove()
+				$('#waveform-'+ID+' + div').remove()
 				$('#waveform-'+ID).css('display','block')
+				$('[data-id='+ID+']').parent().addClass('loaded')
+				$('[data-id='+ID+'] > .audio-title').css('display','block')
 			})
 	
 		}
 
-		//Add skeleton loader instaed of rounf
+		//Add skeleton loader instaed of round
 		function addLoader(pageNo){
-			console.log("pageno ",pageNo);
+			// console.log("pageno ",pageNo);
 			AppState.slides.forEach((item, index, array) => {
 
-			let elementPageNo = parseInt(item.getAttribute('data-page'));
-			if(elementPageNo != pageNo){
-				return;
-			}
+				let elementPageNo = parseInt(item.getAttribute('data-page'));
+				if(elementPageNo != pageNo){
+					return;
+				}
 
-			const loader = document.createElement( 'div');
-			loader.className = 'loader';
-			const media = item.querySelector('img, video, p');
-			if (media?.tagName === 'IMG') {
-				item.appendChild(loader);
-				media.onload = () => {
-				item.classList.add('loaded');
-				loader.remove();
-				};
-			} else if (media?.tagName === 'VIDEO') {
-				item.appendChild(loader);
-				media.onloadeddata = () => {
-				item.classList.add('loaded');
-				loader.remove();
-				};
-			}
+				const loader = document.createElement( 'div');
+				loader.className = 'loader';
+				const media = item.querySelector('img, video, p');
+				if (media?.tagName === 'IMG') {
+					item.appendChild(loader);
+					media.onload = () => {
+					item.classList.add('loaded');
+					loader.remove();
+					};
+				} else if (media?.tagName === 'VIDEO') {
+					item.appendChild(loader);
+					media.onloadeddata = () => {
+					item.classList.add('loaded');
+					loader.remove();
+					};
+				}
 
-			if(item.querySelector('loaded')){
-				loader.remove();
-				console.log("remove loader ",item)
-			}
+				if(item.querySelector('loaded')){
+					loader.remove();
+					// console.log("remove loader ",item)
+				}
 			});
 
+		}
+
+		function resetScrollingFlag(params) {
+			setTimeout(()=>{
+				AppState.isScrolling = false;
+			}, pauseScrollTimeInSec);
 		}
     });
 </script>

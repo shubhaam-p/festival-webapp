@@ -27,7 +27,7 @@ body {
   line-height: 1.5;
   color: #656565;
   text-align: left;
-  background-color: #f0ebf8;
+  background-color: #fbf9fd;
 }
 
 .mb-3, .my-3 {
@@ -178,14 +178,22 @@ input, button, select, optgroup, textarea {
 /* tooltip */
 @media (max-width: 576px) {
   .tooltip2 .tooltipbigtext {
-    width: 350px !important;
-  }  
+        width: 350px !important;
+   }
+  
+   .tooltip2 .tooltiptext::after {
+        display: none;
+   }
 }
 
 @media (max-width: 400px) {
   .tooltip2 .tooltipbigtext {
-    width: 282px !important;
-    margin-left: -144px;
+    width: 310px !important;
+    margin-left: -258px !important;
+  }
+
+  .tooltipbigtext ul{
+    padding-left: 22px;
   }
 }
 
@@ -215,7 +223,7 @@ input, button, select, optgroup, textarea {
 .tooltip2 .tooltipbigtext{
   width: 500px;
   text-align: -webkit-center;
-  margin-left: -249px;
+  margin-left: -254px;
 }
 
 .tooltip2 .tooltiptext::after {
@@ -237,6 +245,11 @@ input, button, select, optgroup, textarea {
 .tooltip2 .tooltipbigtext li {
     text-align: left;
     padding: 0;
+}
+
+.tooltip2 .tooltipbigtext .category {
+    list-style: none;
+    margin-left: -14px;
 }
 
 .qmark-icon {
@@ -286,8 +299,8 @@ span.line {
 .row {
     display: flex;
     flex-wrap: wrap;
-    margin-right: -15px;
-    margin-left: -15px;
+    /* margin-right: -15px;
+    margin-left: -15px; */
 }
 
 .col-6 {

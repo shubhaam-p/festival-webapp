@@ -67,9 +67,10 @@
         }
 
         //Add last page here only
-        if(!empty($isLastPage) && !empty($isHomePage)){
-            array_push($scannedData, array('ID'=>0, 'MIMETYPE'=>'last/slide'));
-        }
+        //***  Commenting this bcz making changes for never ending scroll
+        // if(!empty($isLastPage) && !empty($isHomePage)){
+        //     array_push($scannedData, array('ID'=>0, 'MIMETYPE'=>'last/slide'));
+        // }
 
         // Re-calculate after poppping last element & if last page is added.
         $data = $scannedData;

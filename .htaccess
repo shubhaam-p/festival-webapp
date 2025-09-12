@@ -69,10 +69,10 @@ DirectorySlash Off
 ErrorDocument 404 /404.php
 
 # RewriteRule ^/?$ views/index.php
-RewriteRule ^/?$ views/user/index.php
+RewriteRule ^apfsubmit?$ views/user/index.php
 RewriteRule ^admin/form/([0-9]+)$ views/user/index.php?admin=$1 [L,QSA]
-RewriteRule ^archive?$ views/user/gallery.php
-RewriteRule ^admin/archive?$ views/user/editMediaFiles.php
+RewriteRule ^apfarchive?$ views/user/gallery.php
+RewriteRule ^admin/apfarchive?$ views/user/editMediaFiles.php
 RewriteRule ^new-cont-reg?$ controller/controller.php
 
 RewriteCond %{REQUEST_FILENAME} !-f

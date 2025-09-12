@@ -5,7 +5,7 @@
 /* custom font */
 @font-face {
   font-family: 'MyCustomFont';
-  src: url('../font/D-DIN-Bold.otf');
+  src: url('../font/D-DIN.otf');
   font-weight: normal; 
   font-style: normal;
 }
@@ -19,7 +19,7 @@ body, html{
     padding: 0;
     height: 100%;
     font-family: 'MyCustomFont', sans-serif;
-    background-color:#f0ebf8;
+    background-color:#fbf9fd;
 }
 
 [id^='waveform-']{
@@ -60,8 +60,9 @@ body, html{
 .audio-title, .media-caption {
   text-transform: capitalize;
   font-size: larger;
-  font-weight: 700;
-  padding: 1rem 0;
+  font-weight: 500;
+  padding: 2rem 0;
+  color: #5c5c5c;
 }
 
 .media-caption{
@@ -94,13 +95,13 @@ body, html{
 .media-slide {
   display: none;
   flex-direction: column;
-  align-items: center;
+  /* align-items: center; */
   justify-content: center;
   width: 100%;
   max-height: 90vh;
   height: 90vh; /* Fixed height */
   position: relative;
-  text-align: center;
+  text-align: left;
 }
 
 .media-slide.active {
@@ -114,7 +115,7 @@ body, html{
   height: auto;
   width: auto;
   object-fit: contain;
-  border-radius: 10px;
+  /* border-radius: 10px; */
   box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 /* media slide  */

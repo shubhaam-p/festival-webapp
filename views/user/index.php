@@ -60,21 +60,19 @@
                                 <img src="<?php echo $webURL; ?>reckStatic/images/qmark.png" alt="info" class="qmark-icon">
                                 <span class="tooltiptext tooltipbigtext">
                                     <div class="">
-                                        <div>
-                                            <b>Media Upload Guidelines</b>
-                                        </div>
+                                        <div>Media Upload Guidelines</div>
                                         <div class="row fs-small">
                                             <div class="col-6">
-                                                <div class="category"><b>Images:</b></div>
                                                 <ul>
+                                                    <li class="category">Images:</li>
                                                     <li>Maximum No. 2</li>
                                                     <li>File size: 500KB or less</li>
                                                     <li>Formats accepted: 'jpg', 'jpeg', 'png'</li>
                                                 </ul>
                                             </div>
                                             <div class="col-6">
-                                                <div><b>Audio, Video, or GIF:</b></div>
                                                 <ul>
+                                                    <li class="category">Audio, Video, or GIF:</li>
                                                     <li>Maximum No. 2</li>
                                                     <li>File size: 1MB or less</li>
                                                     <li>Formats accepted: 'gif', 'mp3', 'mp4'</li>
