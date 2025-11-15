@@ -169,6 +169,12 @@
 
 		// Scroll down detection for non-touch devices
 		window.addEventListener('wheel', (e) => {
+			// Check to not scroll, when pinching (zooming-out) 
+			if (e.ctrlKey || e.metaKey) {
+				console.log("wheel swipe return - (zoom out)", e.ctrlKey , e.metaKey)
+				return;
+			}
+
 			if(AppState.isScrolling) 
 				return;
 
